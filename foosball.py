@@ -168,18 +168,17 @@ class TournamentApp:
 
         tk.Label(entry_frame, text="Seed:", font=('Arial', 11), bg="#f8f6ff").pack(side=tk.LEFT, padx=(0, 5))
         seed_var = tk.IntVar(value=1)
-        seed1 = tk.Radiobutton(
-            entry_frame, text="1", variable=seed_var, value=1,
-            font=('Arial', 11, 'bold'), bg="#e2f3fa", fg="#0c457d",
-            selectcolor="#b0e3ff", indicatoron=0, width=3, pady=4, bd=2, relief="groove"
-        )
-        seed1.pack(side=tk.LEFT, padx=(0, 2))
-        seed2 = tk.Radiobutton(
-            entry_frame, text="2", variable=seed_var, value=2,
-            font=('Arial', 11, 'bold'), bg="#fae2fa", fg="#7d0c69",
-            selectcolor="#edc6f8", indicatoron=0, width=3, pady=4, bd=2, relief="groove"
-        )
-        seed2.pack(side=tk.LEFT, padx=(2, 0))
+        seeds = [
+            {"text": "1", "bg": "#e2f3fa", "fg": "#0c457d", "selectcolor": "#b0e3ff"},
+            {"text": "2", "bg": "#fae2fa", "fg": "#7d0c69", "selectcolor": "#edc6f8"},
+            {"text": "3", "bg": "#fef4e3", "fg": "#b86b00", "selectcolor": "#ffe5b0"},
+        ]
+        for s in seeds:
+            tk.Radiobutton(
+                entry_frame, text=s["text"], variable=seed_var, value=int(s["text"]),
+                font=('Arial', 11, 'bold'), bg=s["bg"], fg=s["fg"],
+                selectcolor=s["selectcolor"], indicatoron=0, width=3, pady=4, bd=2, relief="groove"
+            ).pack(side=tk.LEFT, padx=2)
 
         # --- Buttons ---
         btn_frame = tk.Frame(card, bg="#f8f6ff")
@@ -242,7 +241,6 @@ class TournamentApp:
         card = tk.Frame(seed_window, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.97)
 
-        # Title
         tk.Label(
             card, text="Players and Seeds", font=('Arial', 16, 'bold'),
             bg="#f8f6ff", fg="#5433a3"
@@ -262,10 +260,10 @@ class TournamentApp:
         def refresh_list():
             listbox.delete(0, tk.END)
             for player in self.data["players"]:
+                # Show all possible seeds
                 listbox.insert(tk.END, f"{player['name']} (Seed {player['seed']})")
         refresh_list()
 
-        # Nice button style
         style = ttk.Style()
         style.configure("SeedChange.TButton", font=('Arial', 11, 'bold'), padding=8)
 
@@ -278,14 +276,13 @@ class TournamentApp:
             index = selection[0]
             player = self.data["players"][index]
 
-            # Use the custom beautiful dialog
+            # Updated ask_seed supports seed 1, 2, 3
             new_seed = self.ask_seed(seed_window, player["name"], player["seed"])
-            if new_seed in (1, 2):
+            if new_seed in (1, 2, 3):
                 self.data["players"][index]["seed"] = new_seed
                 self.save_data()
                 refresh_list()
 
-        # Place the button in its own frame to control placement
         button_frame = tk.Frame(card, bg="#f8f6ff")
         button_frame.pack(pady=(10, 10))
         ttk.Button(
@@ -297,46 +294,43 @@ class TournamentApp:
 
         # Optional: Footer hint
         tk.Label(
-            card, text="Tip: 1 = stronger, 2 = strong",
+            card, text="Tip: 1 = stronger, 2 = strong, 3 = beginner",
             font=('Arial', 9), bg="#f8f6ff", fg="#888"
         ).pack(side=tk.BOTTOM, pady=(4, 12))
 
     def ask_seed(self, parent, player_name, current_seed):
         dialog = tk.Toplevel(parent)
         dialog.title("Change Seed")
-        dialog.geometry("340x270")  # Increased height
+        dialog.geometry("340x310")
         dialog.configure(bg="#eaf0fb")
         dialog.grab_set()
         dialog.resizable(False, False)
         dialog.transient(parent)
 
-        # Card frame - pack fills dialog
         card = tk.Frame(dialog, bg="#f8f6ff", bd=3, relief="ridge")
         card.pack(expand=True, fill=tk.BOTH, padx=14, pady=14)
 
-        # Title
         tk.Label(
             card, text=f"Seed for {player_name}", font=('Arial', 14, 'bold'),
             bg="#f8f6ff", fg="#5433a3"
         ).pack(pady=(18, 7))
 
-        # Radio buttons for seed selection
         var = tk.IntVar(value=current_seed)
         radio_frame = tk.Frame(card, bg="#f8f6ff")
         radio_frame.pack(pady=10)
 
-        tk.Radiobutton(
-            radio_frame, text="1 (Stronger)", variable=var, value=1,
-            font=('Arial', 12, 'bold'), bg="#e2f3fa", fg="#0c457d",
-            selectcolor="#b0e3ff", indicatoron=0, width=16, pady=7, bd=2, relief="groove", anchor="w"
-        ).pack(pady=7)
-        tk.Radiobutton(
-            radio_frame, text="2 (Strong)", variable=var, value=2,
-            font=('Arial', 12, 'bold'), bg="#fae2fa", fg="#7d0c69",
-            selectcolor="#edc6f8", indicatoron=0, width=16, pady=7, bd=2, relief="groove", anchor="w"
-        ).pack(pady=7)
+        options = [
+            {"text": "1 (Stronger)", "value": 1, "bg": "#e2f3fa", "fg": "#0c457d", "selectcolor": "#b0e3ff"},
+            {"text": "2 (Strong)", "value": 2, "bg": "#fae2fa", "fg": "#7d0c69", "selectcolor": "#edc6f8"},
+            {"text": "3 (Beginner)", "value": 3, "bg": "#fef4e3", "fg": "#b86b00", "selectcolor": "#ffe5b0"},
+        ]
+        for opt in options:
+            tk.Radiobutton(
+                radio_frame, text=opt["text"], variable=var, value=opt["value"],
+                font=('Arial', 12, 'bold'), bg=opt["bg"], fg=opt["fg"],
+                selectcolor=opt["selectcolor"], indicatoron=0, width=16, pady=7, bd=2, relief="groove", anchor="w"
+            ).pack(pady=6)
 
-        # Button frame
         btn_frame = tk.Frame(card, bg="#f8f6ff")
         btn_frame.pack(pady=18)
 
@@ -374,26 +368,39 @@ class TournamentApp:
         self.scores = {}
 
         if use_seed:
+            # Seed 1 + Seed 3 pairings
             seed1 = [p["name"] for p in self.current_players if p["seed"] == 1]
             seed2 = [p["name"] for p in self.current_players if p["seed"] == 2]
+            seed3 = [p["name"] for p in self.current_players if p["seed"] == 3]
 
             random.shuffle(seed1)
             random.shuffle(seed2)
+            random.shuffle(seed3)
 
-            min_len = min(len(seed1), len(seed2))
-            for i in range(min_len):
-                self.teams.append((seed1[i], seed2[i]))
+            min13 = min(len(seed1), len(seed3))
+            for i in range(min13):
+                self.teams.append((seed1[i], seed3[i]))
 
-            leftovers = seed1[min_len:] + seed2[min_len:]
+            leftovers_1 = seed1[min13:]
+            leftovers_3 = seed3[min13:]
+            leftovers = leftovers_1 + leftovers_3
             random.shuffle(leftovers)
             i = 0
             while i < len(leftovers) - 1:
                 self.teams.append((leftovers[i], leftovers[i+1]))
                 i += 2
             if i < len(leftovers):
-                self.teams.append((leftovers[i],))  # Solo team
+                self.teams.append((leftovers[i],))
+
+            i = 0
+            while i < len(seed2) - 1:
+                self.teams.append((seed2[i], seed2[i+1]))
+                i += 2
+            if i < len(seed2):
+                self.teams.append((seed2[i],))
 
         else:
+            # Random pairing, ignore seeds
             players = [p["name"] for p in self.current_players]
             random.shuffle(players)
             i = 0
@@ -401,7 +408,7 @@ class TournamentApp:
                 self.teams.append((players[i], players[i+1]))
                 i += 2
             if i < len(players):
-                self.teams.append((players[i],))  # Solo team
+                self.teams.append((players[i],))
 
         self.scores = {i: 0 for i in range(len(self.teams))}
 
