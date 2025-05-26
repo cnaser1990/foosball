@@ -368,7 +368,7 @@ class TournamentApp:
         self.scores = {}
 
         if use_seed:
-            # Seed 1 + Seed 3 pairings
+            # Group by seed
             seed1 = [p["name"] for p in self.current_players if p["seed"] == 1]
             seed2 = [p["name"] for p in self.current_players if p["seed"] == 2]
             seed3 = [p["name"] for p in self.current_players if p["seed"] == 3]
@@ -377,14 +377,26 @@ class TournamentApp:
             random.shuffle(seed2)
             random.shuffle(seed3)
 
+            # Pair seed 1 with seed 3
             min13 = min(len(seed1), len(seed3))
             for i in range(min13):
                 self.teams.append((seed1[i], seed3[i]))
 
-            leftovers_1 = seed1[min13:]
-            leftovers_3 = seed3[min13:]
-            leftovers = leftovers_1 + leftovers_3
+            leftover_1 = seed1[min13:]
+            leftover_3 = seed3[min13:]
+
+            # Pair seed 2 with seed 2
+            pairs_2 = len(seed2) // 2
+            for i in range(pairs_2):
+                self.teams.append((seed2[2*i], seed2[2*i+1]))
+
+            leftover_2 = seed2[2*pairs_2:]
+
+            # Gather ALL leftovers (from seed 1, 2, 3)
+            leftovers = list(leftover_1) + list(leftover_2) + list(leftover_3)
             random.shuffle(leftovers)
+
+            # Pair up leftovers as much as possible
             i = 0
             while i < len(leftovers) - 1:
                 self.teams.append((leftovers[i], leftovers[i+1]))
@@ -392,15 +404,8 @@ class TournamentApp:
             if i < len(leftovers):
                 self.teams.append((leftovers[i],))
 
-            i = 0
-            while i < len(seed2) - 1:
-                self.teams.append((seed2[i], seed2[i+1]))
-                i += 2
-            if i < len(seed2):
-                self.teams.append((seed2[i],))
-
         else:
-            # Random pairing, ignore seeds
+            # Non-seeded: just random pairs
             players = [p["name"] for p in self.current_players]
             random.shuffle(players)
             i = 0
