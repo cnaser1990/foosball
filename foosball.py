@@ -52,24 +52,58 @@ class TournamentApp:
 
     def create_main_frame(self):
         self.clear_window()
+        self.root.configure(bg="#eaf0fb")
+        self.root.geometry("750x500")  # Slightly taller for aesthetics
 
-        self.main_frame = ttk.Frame(self.root)
-        self.main_frame.pack(expand=True, fill='both', padx=20, pady=20)
+        # Card-like container for content
+        card = tk.Frame(self.root, bg="#f8f6ff", bd=3, relief="ridge")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.92, relheight=0.92)
 
-        ttk.Label(self.main_frame, text="Select Players", font=('Arial', 16)).pack(pady=10)
+        # Large title
+        tk.Label(
+            card, text="Foosball Tournament Manager", font=('Arial', 18, 'bold'),
+            bg="#f8f6ff", fg="#5433a3"
+        ).pack(pady=(18, 4))
 
-        self.player_listbox = tk.Listbox(self.main_frame, selectmode=tk.MULTIPLE, height=12)
+        # Subtitle
+        tk.Label(
+            card, text="Select Players", font=('Arial', 13, 'bold'),
+            bg="#f8f6ff", fg="#333"
+        ).pack(pady=(0, 12))
+
+        # Stylish Listbox with a surrounding frame for border effect
+        listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
+        listbox_frame.pack(pady=(0, 14), padx=28, fill=tk.X)
+        self.player_listbox = tk.Listbox(
+            listbox_frame, selectmode=tk.MULTIPLE, height=11,
+            font=('Segoe UI', 12), bg="#f8f6ff", fg="#222",
+            selectbackground="#a4b0ff", activestyle='none', relief='flat'
+        )
         for player in self.data["players"]:
             self.player_listbox.insert(tk.END, player["name"])
-        self.player_listbox.pack(pady=10)
+        self.player_listbox.pack(padx=6, pady=6, fill=tk.BOTH, expand=True)
 
-        btn_frame = ttk.Frame(self.main_frame)
-        btn_frame.pack(pady=10)
+        # Button frame
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
+        btn_frame.pack(pady=18)
 
-        ttk.Button(btn_frame, text="Add Player", command=self.add_player, style="Add.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Start Tournament", command=self.start_tournament, style="Start.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="View Champions", command=self.show_champions, style="Champions.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Manage Seeds", command=self.manage_seeds, style="Seed.TButton").pack(side=tk.LEFT, padx=5)
+        # Button styles (make them bigger/bolder, add hover effect)
+        style = ttk.Style()
+        style.configure("TButton", font=('Arial', 11, 'bold'), padding=8)
+        style.map("TButton",
+                foreground=[('active', '#fff')],
+                background=[('active', '#7a83fa')])
+
+        ttk.Button(btn_frame, text="Add Player", command=self.add_player, style="Add.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
+        ttk.Button(btn_frame, text="Start Tournament", command=self.start_tournament, style="Start.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
+        ttk.Button(btn_frame, text="View Champions", command=self.show_champions, style="Champions.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
+        ttk.Button(btn_frame, text="Manage Seeds", command=self.manage_seeds, style="Seed.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
+
+        # Optional: Footer hint
+        tk.Label(
+            card, text="Tip: Hold Ctrl (Cmd on Mac) to select multiple players",
+            font=('Arial', 9), bg="#f8f6ff", fg="#888"
+        ).pack(side=tk.BOTTOM, pady=(6, 10))
 
     def add_player(self):
         name = simpledialog.askstring("Add Player", "Enter player name:")
