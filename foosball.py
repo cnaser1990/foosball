@@ -422,42 +422,52 @@ class TournamentApp:
         match_num = self.current_match_index + 1
         total_matches = len(self.matches)
 
-        # Set root background for consistency
-        self.root.configure(bg="#e9e9e9")
-        
+        # Set root background (match all dialogs)
+        self.root.configure(bg="#eaf0fb")
+
         # Main frame uses all available space
-        match_frame = tk.Frame(self.root, bg="#e9e9e9")
+        match_frame = tk.Frame(self.root, bg="#eaf0fb")
         match_frame.pack(expand=True, fill='both')
 
         # Card-like frame, fills much of the window
-        card = tk.Frame(match_frame, bg="#f7f5fa", bd=4, relief="ridge")
+        card = tk.Frame(match_frame, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88, relheight=0.78)
 
-        # Match info
-        tk.Label(card, text=f"Match {match_num} of {total_matches}", font=('Arial', 13, 'bold'), bg="#f7f5fa", fg="#555").pack(pady=(18, 8))
+        # Purple header for match
+        header = tk.Label(
+            card,
+            text=f"Match {match_num} of {total_matches}",
+            font=('Arial', 16, 'bold'),
+            bg="#9265df",
+            fg="white",
+            pady=16,
+            bd=2,
+            relief="groove"
+        )
+        header.pack(fill=tk.X, padx=0, pady=(0, 18))
 
-        # Team vs Team display (centered & bold)
-        vs_frame = tk.Frame(card, bg="#f7f5fa")
-        vs_frame.pack(pady=25)
+        # VS teams display (centered & bold, use consistent accent colors)
+        vs_frame = tk.Frame(card, bg="#f8f6ff")
+        vs_frame.pack(pady=22)
 
         def format_team(team):
             return " & ".join(team)
 
         tk.Label(
             vs_frame, text=format_team(team1), font=('Arial', 18, 'bold'),
-            bg="#d3eafd", fg="#183153", padx=18, pady=5, bd=2, relief="groove"
+            bg="#d4e0fc", fg="#5433a3", padx=18, pady=5, bd=2, relief="groove"
         ).pack(side=tk.LEFT, padx=(0, 18))
         tk.Label(
             vs_frame, text="VS", font=('Arial', 20, 'bold'),
-            bg="#f7f5fa", fg="#9C27B0", padx=10
+            bg="#f8f6ff", fg="#9265df", padx=10
         ).pack(side=tk.LEFT)
         tk.Label(
             vs_frame, text=format_team(team2), font=('Arial', 18, 'bold'),
-            bg="#ffd3d3", fg="#8B2323", padx=18, pady=5, bd=2, relief="groove"
+            bg="#ecd4fc", fg="#5433a3", padx=18, pady=5, bd=2, relief="groove"
         ).pack(side=tk.LEFT, padx=(18, 0))
 
         # Buttons with good spacing
-        btn_frame = tk.Frame(card, bg="#f7f5fa")
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
         btn_frame.pack(pady=28)
 
         ttk.Button(btn_frame, text="Team 1 Wins", command=lambda: self.record_result(t1, t2, '1'), style="Team1.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
