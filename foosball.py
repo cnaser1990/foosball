@@ -2,7 +2,7 @@ import os
 import json
 import random
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox
 from itertools import combinations
 
 DATA_FILE = "players.json"
@@ -18,8 +18,10 @@ class TournamentApp:
         self.teams = []
         self.matches = []
         self.postponed = []
-        self.scores = {}
         self.current_match_index = 0
+
+        # NEW: stats for each team: points, goals for, goals against
+        self.team_stats = {}
 
         self.configure_button_styles()
         self.create_main_frame()
@@ -47,12 +49,12 @@ class TournamentApp:
             background=[('active', '#b71c1c')],
             foreground=[('active', 'white')]
         )
-    
+
     def load_data(self):
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, "r") as f:
                 data = json.load(f)
-                if "players" not in data:  # Support old format
+                if "players" not in data:
                     data["players"] = [{"name": name, "seed": 1} for name in data.get("names", [])]
                     data.pop("names", None)
                 return data
@@ -65,25 +67,21 @@ class TournamentApp:
     def create_main_frame(self):
         self.clear_window()
         self.root.configure(bg="#eaf0fb")
-        self.root.geometry("750x500")  # Slightly taller for aesthetics
+        self.root.geometry("750x500")
 
-        # Card-like container for content
         card = tk.Frame(self.root, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.92, relheight=0.92)
 
-        # Large title
         tk.Label(
             card, text="Foosball Tournament Manager", font=('Arial', 18, 'bold'),
             bg="#f8f6ff", fg="#5433a3"
         ).pack(pady=(18, 4))
 
-        # Subtitle
         tk.Label(
             card, text="Select Players", font=('Arial', 13, 'bold'),
             bg="#f8f6ff", fg="#333"
         ).pack(pady=(0, 12))
 
-        # Stylish Listbox with a surrounding frame for border effect
         listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
         listbox_frame.pack(pady=(0, 14), padx=28, fill=tk.X)
         self.player_listbox = tk.Listbox(
@@ -95,11 +93,9 @@ class TournamentApp:
             self.player_listbox.insert(tk.END, player["name"])
         self.player_listbox.pack(padx=6, pady=6, fill=tk.BOTH, expand=True)
 
-        # Button frame
         btn_frame = tk.Frame(card, bg="#f8f6ff")
         btn_frame.pack(pady=18)
 
-        # Button styles (make them bigger/bolder, add hover effect)
         style = ttk.Style()
         style.configure("TButton", font=('Arial', 11, 'bold'), padding=8)
         style.map("TButton",
@@ -111,7 +107,6 @@ class TournamentApp:
         ttk.Button(btn_frame, text="View Champions", command=self.show_champions, style="Champions.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
         ttk.Button(btn_frame, text="Manage Seeds", command=self.manage_seeds, style="Seed.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
 
-        # Optional: Footer hint
         tk.Label(
             card, text="Tip: Hold Ctrl (Cmd on Mac) to select multiple players",
             font=('Arial', 9), bg="#f8f6ff", fg="#888"
@@ -134,7 +129,6 @@ class TournamentApp:
             bg="#f8f6ff", fg="#5433a3"
         ).pack(pady=(12, 8))
 
-        # Listbox with scrollbar to show current players
         listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
         listbox_frame.pack(pady=(0, 12), padx=18, fill=tk.BOTH, expand=True)
 
@@ -156,7 +150,6 @@ class TournamentApp:
                 player_listbox.insert(tk.END, f"{player['name']} (Seed {player['seed']})")
         refresh_players()
 
-        # --- Add Player Section ---
         entry_frame = tk.Frame(card, bg="#f8f6ff")
         entry_frame.pack(pady=(6, 10))
 
@@ -180,7 +173,6 @@ class TournamentApp:
                 selectcolor=s["selectcolor"], indicatoron=0, width=3, pady=4, bd=2, relief="groove"
             ).pack(side=tk.LEFT, padx=2)
 
-        # --- Buttons ---
         btn_frame = tk.Frame(card, bg="#f8f6ff")
         btn_frame.pack(pady=10)
 
@@ -203,7 +195,6 @@ class TournamentApp:
             refresh_players()
             name_var.set("")
             self.save_data()
-            # Update main window's player listbox if it exists
             if hasattr(self, "player_listbox"):
                 self.player_listbox.delete(0, tk.END)
                 for player in self.data["players"]:
@@ -229,7 +220,7 @@ class TournamentApp:
 
         ttk.Button(btn_frame, text="Remove Selected Player(s)", command=remove_player_action, style="DialogRed.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
         ttk.Button(btn_frame, text="Add Player", command=add_player_action, style="DialogGreen.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
- 
+
     def manage_seeds(self):
         seed_window = tk.Toplevel(self.root)
         seed_window.title("Manage Player Seeds")
@@ -237,7 +228,6 @@ class TournamentApp:
         seed_window.configure(bg="#eaf0fb")
         seed_window.resizable(False, False)
 
-        # Card-like main frame (increase relheight)
         card = tk.Frame(seed_window, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.97)
 
@@ -246,7 +236,6 @@ class TournamentApp:
             bg="#f8f6ff", fg="#5433a3"
         ).pack(pady=(18, 8))
 
-        # Listbox with border for players (reduce height)
         listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
         listbox_frame.pack(pady=(0, 16), padx=28, fill=tk.BOTH, expand=True)
 
@@ -260,7 +249,6 @@ class TournamentApp:
         def refresh_list():
             listbox.delete(0, tk.END)
             for player in self.data["players"]:
-                # Show all possible seeds
                 listbox.insert(tk.END, f"{player['name']} (Seed {player['seed']})")
         refresh_list()
 
@@ -275,8 +263,6 @@ class TournamentApp:
 
             index = selection[0]
             player = self.data["players"][index]
-
-            # Updated ask_seed supports seed 1, 2, 3
             new_seed = self.ask_seed(seed_window, player["name"], player["seed"])
             if new_seed in (1, 2, 3):
                 self.data["players"][index]["seed"] = new_seed
@@ -292,7 +278,6 @@ class TournamentApp:
             style="SeedChange.TButton"
         ).pack(ipadx=8)
 
-        # Optional: Footer hint
         tk.Label(
             card, text="Tip: 1 = stronger, 2 = strong, 3 = beginner",
             font=('Arial', 9), bg="#f8f6ff", fg="#888"
@@ -365,47 +350,31 @@ class TournamentApp:
 
     def create_teams(self, use_seed=False):
         self.teams = []
-        self.scores = {}
-
         if use_seed:
-            # Group by seed
             seed1 = [p["name"] for p in self.current_players if p["seed"] == 1]
             seed2 = [p["name"] for p in self.current_players if p["seed"] == 2]
             seed3 = [p["name"] for p in self.current_players if p["seed"] == 3]
-
             random.shuffle(seed1)
             random.shuffle(seed2)
             random.shuffle(seed3)
-
-            # Pair seed 1 with seed 3
             min13 = min(len(seed1), len(seed3))
             for i in range(min13):
                 self.teams.append((seed1[i], seed3[i]))
-
             leftover_1 = seed1[min13:]
             leftover_3 = seed3[min13:]
-
-            # Pair seed 2 with seed 2
             pairs_2 = len(seed2) // 2
             for i in range(pairs_2):
                 self.teams.append((seed2[2*i], seed2[2*i+1]))
-
             leftover_2 = seed2[2*pairs_2:]
-
-            # Gather ALL leftovers (from seed 1, 2, 3)
             leftovers = list(leftover_1) + list(leftover_2) + list(leftover_3)
             random.shuffle(leftovers)
-
-            # Pair up leftovers as much as possible
             i = 0
             while i < len(leftovers) - 1:
                 self.teams.append((leftovers[i], leftovers[i+1]))
                 i += 2
             if i < len(leftovers):
                 self.teams.append((leftovers[i],))
-
         else:
-            # Non-seeded: just random pairs
             players = [p["name"] for p in self.current_players]
             random.shuffle(players)
             i = 0
@@ -415,7 +384,8 @@ class TournamentApp:
             if i < len(players):
                 self.teams.append((players[i],))
 
-        self.scores = {i: 0 for i in range(len(self.teams))}
+        # NEW: team stats structure
+        self.team_stats = {i: {'points': 0, 'gf': 0, 'ga': 0} for i in range(len(self.teams))}
 
     def create_matches(self):
         self.matches = list(combinations(range(len(self.teams)), 2))
@@ -434,70 +404,137 @@ class TournamentApp:
         match_num = self.current_match_index + 1
         total_matches = len(self.matches)
 
-        # Set root background (match all dialogs)
         self.root.configure(bg="#eaf0fb")
-
-        # Main frame uses all available space
         match_frame = tk.Frame(self.root, bg="#eaf0fb")
         match_frame.pack(expand=True, fill='both')
 
-        # Card-like frame, fills much of the window
-        card = tk.Frame(match_frame, bg="#f8f6ff", bd=3, relief="ridge")
-        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88, relheight=0.78)
+        # --- Main Card ---
+        card = tk.Frame(match_frame, bg="#f8f6ff", bd=5, relief="ridge", highlightbackground="#bca8f7", highlightthickness=2)
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88, relheight=0.82)
 
-        # Purple header for match
-        header = tk.Label(
+        # --- Match Number Badge ---
+        badge = tk.Label(
             card,
-            text=f"Match {match_num} of {total_matches}",
-            font=('Arial', 16, 'bold'),
-            bg="#9265df",
-            fg="white",
-            pady=16,
-            bd=2,
-            relief="groove"
+            text=f"Match {match_num}/{total_matches}",
+            font=('Arial', 12, 'bold'),
+            bg="#6d47c3", fg="white",
+            bd=0, padx=16, pady=4
         )
-        header.pack(fill=tk.X, padx=0, pady=(0, 18))
+        badge.place(relx=0.5, y=19, anchor="n")
 
-        # VS teams display (centered & bold, use consistent accent colors)
+        # --- Teams Display ---
         vs_frame = tk.Frame(card, bg="#f8f6ff")
-        vs_frame.pack(pady=22)
+        vs_frame.place(relx=0.5, rely=0.20, anchor="n")
 
         def format_team(team):
             return " & ".join(team)
 
+        team1_label = tk.Label(
+            vs_frame, text=format_team(team1),
+            font=('Arial', 19, 'bold'),
+            bg="#e5eaff", fg="#5433a3",
+            padx=22, pady=10, bd=2, relief="groove", width=15
+        )
+        team1_label.pack(side=tk.LEFT, padx=(0, 18))
+
+        vs_label = tk.Label(
+            vs_frame, text="VS",
+            font=('Arial Black', 22, 'bold'),
+            bg="#f8f6ff", fg="#9265df", padx=16
+        )
+        vs_label.pack(side=tk.LEFT)
+
+        team2_label = tk.Label(
+            vs_frame, text=format_team(team2),
+            font=('Arial', 19, 'bold'),
+            bg="#f5e6ff", fg="#5433a3",
+            padx=22, pady=10, bd=2, relief="groove", width=15
+        )
+        team2_label.pack(side=tk.LEFT, padx=(18, 0))
+
+        # --- Score Entry Section ---
+        score_frame = tk.Frame(card, bg="#f8f6ff")
+        score_frame.place(relx=0.5, rely=0.50, anchor="center")
+
+        # Beautiful Score Inputs (with + and - buttons)
+        def make_score_box(label_text, color_bg, color_fg, var):
+            box = tk.Frame(score_frame, bg="#f8f6ff")
+            tk.Label(box, text=label_text, font=('Arial', 13, 'bold'), bg="#f8f6ff", fg="#757575").pack()
+            inner = tk.Frame(box, bg="#f8f6ff")
+            inner.pack()
+            def dec():
+                var.set(max(0, var.get() - 1))
+            def inc():
+                var.set(var.get() + 1)
+            dec_btn = tk.Button(inner, text="−", font=("Arial", 14, "bold"), width=2, command=dec, bg="#eee", fg="#444", bd=0, relief="flat")
+            dec_btn.pack(side=tk.LEFT, padx=(0,3))
+            entry = tk.Entry(inner, textvariable=var, font=('Arial', 19, 'bold'), width=3, justify="center", bg=color_bg, fg=color_fg, bd=2, relief="groove")
+            entry.pack(side=tk.LEFT)
+            inc_btn = tk.Button(inner, text="+", font=("Arial", 14, "bold"), width=2, command=inc, bg="#eee", fg="#444", bd=0, relief="flat")
+            inc_btn.pack(side=tk.LEFT, padx=(3,0))
+            return box
+
+        g1_var = tk.IntVar(value=0)
+        g2_var = tk.IntVar(value=0)
+        team1_box = make_score_box("Goals Team 1", "#d7eaff", "#1a237e", g1_var)
+        team2_box = make_score_box("Goals Team 2", "#f3e2fa", "#6a1b9a", g2_var)
+        team1_box.pack(side=tk.LEFT, padx=(0, 35))
+        team2_box.pack(side=tk.LEFT, padx=(35, 0))
+
+        # --- Action Buttons ---
+        def submit_result():
+            try:
+                g1 = int(g1_var.get())
+                g2 = int(g2_var.get())
+                if g1 < 0 or g2 < 0:
+                    messagebox.showwarning("Error", "Goals cannot be negative.", parent=self.root)
+                    return
+            except:
+                messagebox.showwarning("Error", "Enter a valid integer for goals.", parent=self.root)
+                return
+            self.record_goal_result(t1, t2, g1, g2)
+
+        btns_frame = tk.Frame(card, bg="#f8f6ff")
+        btns_frame.place(relx=0.5, rely=0.72, anchor="center")
+        style = ttk.Style()
+        # Ensure button styles are set ONCE per session to avoid warning
+        if not hasattr(self, '_btn_styles_set'):
+            style.configure("Result.TButton", font=('Arial', 13, 'bold'), background="#4CAF50", foreground="white", padding=8)
+            style.map("Result.TButton", background=[('active', '#388e3c')])
+            style.configure("Postpone.TButton", font=('Arial', 13, 'bold'), background="#F57C00", foreground="white", padding=8)
+            style.map("Postpone.TButton", background=[('active', '#bb4d00')])
+            self._btn_styles_set = True
+
+        ttk.Button(btns_frame, text="✔ Submit Result", command=submit_result, style="Result.TButton").pack(side=tk.LEFT, padx=28, ipadx=12, ipady=7)
+        ttk.Button(btns_frame, text="⏸ Postpone", command=self.postpone_match, style="Postpone.TButton").pack(side=tk.LEFT, padx=28, ipadx=12, ipady=7)
+
+        # --- View Scores Button ---
+        ttk.Button(card, text="View Scores", command=self.show_scores, style="Scores.TButton").place(relx=0.5, rely=0.89, anchor="center")
+
+        # --- Footer Hint ---
         tk.Label(
-            vs_frame, text=format_team(team1), font=('Arial', 18, 'bold'),
-            bg="#d4e0fc", fg="#5433a3", padx=18, pady=5, bd=2, relief="groove"
-        ).pack(side=tk.LEFT, padx=(0, 18))
-        tk.Label(
-            vs_frame, text="VS", font=('Arial', 20, 'bold'),
-            bg="#f8f6ff", fg="#9265df", padx=10
-        ).pack(side=tk.LEFT)
-        tk.Label(
-            vs_frame, text=format_team(team2), font=('Arial', 18, 'bold'),
-            bg="#ecd4fc", fg="#5433a3", padx=18, pady=5, bd=2, relief="groove"
-        ).pack(side=tk.LEFT, padx=(18, 0))
+            card,
+            text="Tip: Use + / − or type to adjust goals, then press ✔",
+            font=('Arial', 10, 'italic'),
+            bg="#f8f6ff", fg="#999"
+        ).place(relx=0.5, rely=0.97, anchor="center")
+    
+    def record_goal_result(self, t1, t2, g1, g2):
+        # Update goals for and against
+        self.team_stats[t1]['gf'] += g1
+        self.team_stats[t1]['ga'] += g2
+        self.team_stats[t2]['gf'] += g2
+        self.team_stats[t2]['ga'] += g1
 
-        # Buttons with good spacing
-        btn_frame = tk.Frame(card, bg="#f8f6ff")
-        btn_frame.pack(pady=28)
+        # Update points
+        if g1 > g2:
+            self.team_stats[t1]['points'] += 3
+        elif g2 > g1:
+            self.team_stats[t2]['points'] += 3
+        else:
+            self.team_stats[t1]['points'] += 1
+            self.team_stats[t2]['points'] += 1
 
-        ttk.Button(btn_frame, text="Team 1 Wins", command=lambda: self.record_result(t1, t2, '1'), style="Team1.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
-        ttk.Button(btn_frame, text="Team 2 Wins", command=lambda: self.record_result(t1, t2, '2'), style="Team2.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
-        ttk.Button(btn_frame, text="Draw", command=lambda: self.record_result(t1, t2, 'd'), style="Draw.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
-        ttk.Button(btn_frame, text="Postpone", command=self.postpone_match, style="Postpone.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
-
-        # View scores button at the bottom
-        ttk.Button(card, text="View Scores", command=self.show_scores, style="Scores.TButton").pack(pady=(18, 12))
-
-    def record_result(self, t1, t2, result):
-        if result == '1':
-            self.scores[t1] += 3
-        elif result == '2':
-            self.scores[t2] += 3
-        elif result == 'd':
-            self.scores[t1] += 1
-            self.scores[t2] += 1
         self.current_match_index += 1
         self.show_match()
 
@@ -509,14 +546,12 @@ class TournamentApp:
     def show_scores(self):
         score_window = tk.Toplevel(self.root)
         score_window.title("Current Scores")
-        score_window.geometry("540x480")
+        score_window.geometry("780x500")
         score_window.configure(bg="#ede7f6")
 
-        # Card frame
         card = tk.Frame(score_window, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.93)
 
-        # Header
         header = tk.Label(
             card,
             text="Team Scores",
@@ -529,56 +564,64 @@ class TournamentApp:
         )
         header.pack(fill=tk.X, padx=0, pady=(0, 10))
 
-        # Table headers
+        font_row = ('DejaVu Sans Mono', 13, 'bold')
+        font_header = ('DejaVu Sans Mono', 12, 'bold')
+
         table_frame = tk.Frame(card, bg="#f8f6ff")
         table_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
         header_row = tk.Frame(table_frame, bg="#ede7f6")
         header_row.pack(fill=tk.X)
-        tk.Label(header_row, text="Rank", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=6, anchor="w").pack(side=tk.LEFT, padx=(3,0))
-        tk.Label(header_row, text="Team", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=26, anchor="w").pack(side=tk.LEFT, padx=(5,0))
-        tk.Label(header_row, text="Points", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=7, anchor="e").pack(side=tk.LEFT, padx=(6,0))
 
-        # Listbox with scrollbar
+        # The widths here are tuned for the formatting below!
+        tk.Label(header_row, text="Rk",   font=font_header, bg="#ede7f6", fg="#6a1b9a", width=4, anchor="e").pack(side=tk.LEFT)
+        tk.Label(header_row, text="Team", font=font_header, bg="#ede7f6", fg="#6a1b9a", width=31, anchor="w").pack(side=tk.LEFT)
+        tk.Label(header_row, text="Pts",  font=font_header, bg="#ede7f6", fg="#6a1b9a", width=6, anchor="e").pack(side=tk.LEFT)
+        tk.Label(header_row, text="GF",   font=font_header, bg="#ede7f6", fg="#6a1b9a", width=6, anchor="e").pack(side=tk.LEFT)
+        tk.Label(header_row, text="GA",   font=font_header, bg="#ede7f6", fg="#6a1b9a", width=6, anchor="e").pack(side=tk.LEFT)
+        tk.Label(header_row, text="GD",   font=font_header, bg="#ede7f6", fg="#6a1b9a", width=6, anchor="e").pack(side=tk.LEFT)
+
         lb_frame = tk.Frame(table_frame, bg="#f8f6ff")
         lb_frame.pack(fill=tk.BOTH, expand=True, pady=(0,8))
 
         listbox = tk.Listbox(
             lb_frame,
-            font=('DejaVu Sans Mono', 13, 'bold'),
+            font=font_row,
             bg="#f8f6ff",
             fg="#111",
-            width=48,
+            width=80,
             height=14,
             bd=0,
             selectbackground="#d1c4e9",
             activestyle='none',
             highlightthickness=0,
-
         )
         listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Prepare and sort teams by score DESC, then name
         team_scores = []
-        for idx, score in self.scores.items():
+        for idx, stats in self.team_stats.items():
             team = " & ".join(self.teams[idx])
-            team_scores.append((team, score))
-        sorted_teams = sorted(team_scores, key=lambda x: (-x[1], x[0]))
+            points = stats['points']
+            gf = stats['gf']
+            ga = stats['ga']
+            gd = gf - ga
+            team_scores.append((team, points, gf, ga, gd))
 
-        # Color for top 3
+        sorted_teams = sorted(team_scores, key=lambda x: (-x[1], -x[4], x[0]))
+
         row_colors = [
-            ("#ffe082", "#111"),   # gold bg, black text
-            ("#e0e0e0", "#111"),   # silver bg, black text
-            ("#ffccbc", "#111")    # bronze bg, black text
+            ("#ffe082", "#111"),
+            ("#e0e0e0", "#111"),
+            ("#ffccbc", "#111")
         ]
 
-        for idx, (team, score) in enumerate(sorted_teams, start=1):
-            line = f"{str(idx):>2}   {team:<28} {str(score).rjust(6)}"
+        for idx, (team, points, gf, ga, gd) in enumerate(sorted_teams, start=1):
+            # Visual columns: right align all numbers, left align team name
+            line = f"{idx:>3}  {team:<31}  {points:>4}   {gf:>4}   {ga:>4}   {gd:>4}"
             listbox.insert(tk.END, line)
             if idx <= 3:
                 bg, fg = row_colors[idx-1]
                 listbox.itemconfig(tk.END, bg=bg, fg=fg)
 
-        # Footer/hint
         tk.Label(
             card,
             font=('Arial', 9),
@@ -601,13 +644,23 @@ class TournamentApp:
             self.show_match()
             return
 
-        max_score = max(self.scores.values())
-        winners = [i for i, s in self.scores.items() if s == max_score]
+        max_point = max(stat['points'] for stat in self.team_stats.values())
+        winners = [i for i, stat in self.team_stats.items() if stat['points'] == max_point]
 
         if len(winners) == 1:
             self.declare_champion(winners[0])
-        else:
+        elif len(winners) == 2:
             self.handle_tie(winners)
+        else:
+            # Check for best goal difference
+            teams_gd = [(i, self.team_stats[i]['gf'] - self.team_stats[i]['ga']) for i in winners]
+            max_gd = max(gd for _, gd in teams_gd)
+            best = [i for i, gd in teams_gd if gd == max_gd]
+            if len(best) == 1:
+                self.declare_champion(best[0])
+            else:
+                messagebox.showinfo("No Champion", "Same Teams With Same Point Ans Same Goals!")
+                self.create_main_frame()
 
     def declare_champion(self, winner_idx):
         winner = self.teams[winner_idx]
@@ -627,26 +680,119 @@ class TournamentApp:
     def tiebreaker(self, t1, t2):
         self.clear_window()
 
-        tie_frame = ttk.Frame(self.root)
-        tie_frame.pack(expand=True, fill='both', padx=20, pady=20)
+        # Main background frame
+        tie_frame = tk.Frame(self.root, bg="#eaf0fb")
+        tie_frame.pack(expand=True, fill='both', padx=24, pady=24)
 
-        ttk.Label(tie_frame, text="Tiebreaker Match!", font=('Arial', 14)).pack(pady=10)
+        # Card-like frame
+        card = tk.Frame(tie_frame, bg="#f8f6ff", bd=5, relief="ridge", highlightbackground="#bca8f7", highlightthickness=2)
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88, relheight=0.82)
+
+        # Badge for Tiebreaker
+        badge = tk.Label(
+            card,
+            text="⚡ Final Tiebreaker!",
+            font=('Arial', 13, 'bold'),
+            bg="#e04e6a", fg="white",
+            bd=0, padx=18, pady=5
+        )
+        badge.place(relx=0.5, y=19, anchor="n")
+
+        # VS Teams Display
+        vs_frame = tk.Frame(card, bg="#f8f6ff")
+        vs_frame.place(relx=0.5, rely=0.20, anchor="n")
 
         team1 = self.teams[t1]
         team2 = self.teams[t2]
 
-        vs_frame = ttk.Frame(tie_frame)
-        vs_frame.pack(pady=20)
+        def format_team(team):
+            return " & ".join(team)
 
-        ttk.Label(vs_frame, text=" vs ".join(team1), font=('Arial', 12)).pack(side=tk.LEFT)
-        ttk.Label(vs_frame, text=" VS ", font=('Arial', 14, 'bold')).pack(side=tk.LEFT, padx=20)
-        ttk.Label(vs_frame, text=" vs ".join(team2), font=('Arial', 12)).pack(side=tk.LEFT)
+        team1_label = tk.Label(
+            vs_frame, text=format_team(team1),
+            font=('Arial', 19, 'bold'),
+            bg="#e5eaff", fg="#5433a3",
+            padx=22, pady=10, bd=2, relief="groove", width=15
+        )
+        team1_label.pack(side=tk.LEFT, padx=(0, 18))
 
-        btn_frame = ttk.Frame(tie_frame)
-        btn_frame.pack(pady=20)
+        vs_label = tk.Label(
+            vs_frame, text="VS",
+            font=('Arial Black', 22, 'bold'),
+            bg="#f8f6ff", fg="#e04e6a", padx=16
+        )
+        vs_label.pack(side=tk.LEFT)
 
-        ttk.Button(btn_frame, text="Team 1 Wins", command=lambda: self.declare_champion(t1), style="Team1.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Team 2 Wins", command=lambda: self.declare_champion(t2), style="Team2.TButton").pack(side=tk.LEFT, padx=5)
+        team2_label = tk.Label(
+            vs_frame, text=format_team(team2),
+            font=('Arial', 19, 'bold'),
+            bg="#f5e6ff", fg="#5433a3",
+            padx=22, pady=10, bd=2, relief="groove", width=15
+        )
+        team2_label.pack(side=tk.LEFT, padx=(18, 0))
+
+        # Beautiful Score Entry
+        score_frame = tk.Frame(card, bg="#f8f6ff")
+        score_frame.place(relx=0.5, rely=0.50, anchor="center")
+
+        def make_score_box(label_text, color_bg, color_fg, var):
+            box = tk.Frame(score_frame, bg="#f8f6ff")
+            tk.Label(box, text=label_text, font=('Arial', 13, 'bold'), bg="#f8f6ff", fg="#757575").pack()
+            inner = tk.Frame(box, bg="#f8f6ff")
+            inner.pack()
+            def dec():
+                var.set(max(0, var.get() - 1))
+            def inc():
+                var.set(var.get() + 1)
+            dec_btn = tk.Button(inner, text="−", font=("Arial", 14, "bold"), width=2, command=dec, bg="#eee", fg="#444", bd=0, relief="flat")
+            dec_btn.pack(side=tk.LEFT, padx=(0,3))
+            entry = tk.Entry(inner, textvariable=var, font=('Arial', 19, 'bold'), width=3, justify="center", bg=color_bg, fg=color_fg, bd=2, relief="groove")
+            entry.pack(side=tk.LEFT)
+            inc_btn = tk.Button(inner, text="+", font=("Arial", 14, "bold"), width=2, command=inc, bg="#eee", fg="#444", bd=0, relief="flat")
+            inc_btn.pack(side=tk.LEFT, padx=(3,0))
+            return box
+
+        t1_goal = tk.IntVar(value=0)
+        t2_goal = tk.IntVar(value=0)
+        team1_box = make_score_box("Goals Team 1", "#d7eaff", "#1a237e", t1_goal)
+        team2_box = make_score_box("Goals Team 2", "#f3e2fa", "#6a1b9a", t2_goal)
+        team1_box.pack(side=tk.LEFT, padx=(0, 35))
+        team2_box.pack(side=tk.LEFT, padx=(35, 0))
+
+        # Action Button
+        def submit_tiebreaker():
+            try:
+                g1 = int(t1_goal.get())
+                g2 = int(t2_goal.get())
+                if g1 < 0 or g2 < 0:
+                    messagebox.showwarning("Error", "Wrong number!", parent=self.root)
+                    return
+            except:
+                messagebox.showwarning("Error", "Wrong number!", parent=self.root)
+                return
+            if g1 == g2:
+                messagebox.showwarning("Draw", "Finals must have a winner!", parent=self.root)
+                return
+            winner = t1 if g1 > g2 else t2
+            self.declare_champion(winner)
+
+        btns_frame = tk.Frame(card, bg="#f8f6ff")
+        btns_frame.place(relx=0.5, rely=0.72, anchor="center")
+        style = ttk.Style()
+        if not hasattr(self, '_tiebreak_btn_styles_set'):
+            style.configure("Result.TButton", font=('Arial', 13, 'bold'), background="#4CAF50", foreground="white", padding=8)
+            style.map("Result.TButton", background=[('active', '#388e3c')])
+            self._tiebreak_btn_styles_set = True
+
+        ttk.Button(btns_frame, text="🏆 Declare Winner", command=submit_tiebreaker, style="Result.TButton").pack(ipadx=18, ipady=7)
+
+        # Footer Hint
+        tk.Label(
+            card,
+            text="Tip: Use + / − or type to adjust goals. Draws are not allowed in the final.",
+            font=('Arial', 10, 'italic'),
+            bg="#f8f6ff", fg="#e04e6a"
+        ).place(relx=0.5, rely=0.97, anchor="center")
 
     def show_champions(self):
         champ_window = tk.Toplevel(self.root)
@@ -654,11 +800,9 @@ class TournamentApp:
         champ_window.geometry("420x480")
         champ_window.configure(bg="#ede7f6")
 
-        # Card frame
         card = tk.Frame(champ_window, bg="#f8f6ff", bd=3, relief="ridge")
         card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.93)
 
-        # Header
         header = tk.Label(
             card,
             text="Championship Leaderboard",
@@ -671,21 +815,17 @@ class TournamentApp:
         )
         header.pack(fill=tk.X, padx=0, pady=(0, 10))
 
-        # Table headers
         table_frame = tk.Frame(card, bg="#f8f6ff")
         table_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
         header_row = tk.Frame(table_frame, bg="#ede7f6")
         header_row.pack(fill=tk.X)
-        # Use monospace font for "Rank" so it aligns with numbers below
         tk.Label(header_row, text="Rank", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=6, anchor="w").pack(side=tk.LEFT, padx=(2,0))
         tk.Label(header_row, text="Player", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=16, anchor="w").pack(side=tk.LEFT, padx=(10,0))
         tk.Label(header_row, text="Wins", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=7, anchor="e").pack(side=tk.LEFT, padx=(8,0))
 
-        # Listbox with scrollbar
         lb_frame = tk.Frame(table_frame, bg="#f8f6ff")
         lb_frame.pack(fill=tk.BOTH, expand=True, pady=(0,8))
 
-        # Use monospace font for alignment
         listbox = tk.Listbox(
             lb_frame,
             font=('DejaVu Sans Mono', 13, 'bold'),
@@ -701,11 +841,10 @@ class TournamentApp:
 
         listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Background colors for top 3
         row_colors = [
-            ("#ffe082", "#111"),   # 1st: gold bg, black text
-            ("#e0e0e0", "#111"),   # 2nd: silver bg, black text
-            ("#ffccbc", "#111")    # 3rd: bronze bg, black text
+            ("#ffe082", "#111"),
+            ("#e0e0e0", "#111"),
+            ("#ffccbc", "#111")
         ]
 
         sorted_champs = sorted(
@@ -719,7 +858,6 @@ class TournamentApp:
                 bg, fg = row_colors[idx-1]
                 listbox.itemconfig(tk.END, bg=bg, fg=fg)
 
-        # Footer/hint
         tk.Label(
             card,
             font=('Arial', 9),
@@ -737,7 +875,6 @@ class TournamentApp:
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
