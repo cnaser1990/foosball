@@ -118,19 +118,40 @@ class TournamentApp:
     def manage_seeds(self):
         seed_window = tk.Toplevel(self.root)
         seed_window.title("Manage Player Seeds")
-        seed_window.geometry("350x300")
+        seed_window.geometry("480x440")
+        seed_window.configure(bg="#eaf0fb")
+        seed_window.resizable(False, False)
 
-        ttk.Label(seed_window, text="Players and Seeds", font=('Arial', 12)).pack(pady=10)
+        # Card-like main frame (increase relheight)
+        card = tk.Frame(seed_window, bg="#f8f6ff", bd=3, relief="ridge")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.97)
 
-        listbox = tk.Listbox(seed_window, height=10)
-        listbox.pack(pady=10, fill=tk.BOTH, expand=True)
+        # Title
+        tk.Label(
+            card, text="Players and Seeds", font=('Arial', 16, 'bold'),
+            bg="#f8f6ff", fg="#5433a3"
+        ).pack(pady=(18, 8))
+
+        # Listbox with border for players (reduce height)
+        listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
+        listbox_frame.pack(pady=(0, 16), padx=28, fill=tk.BOTH, expand=True)
+
+        listbox = tk.Listbox(
+            listbox_frame, height=10, font=('Segoe UI', 12),
+            bg="#f8f6ff", fg="#222",
+            selectbackground="#a4b0ff", activestyle='none', relief='flat'
+        )
+        listbox.pack(padx=6, pady=6, fill=tk.BOTH, expand=True)
 
         def refresh_list():
             listbox.delete(0, tk.END)
             for player in self.data["players"]:
                 listbox.insert(tk.END, f"{player['name']} (Seed {player['seed']})")
-
         refresh_list()
+
+        # Nice button style
+        style = ttk.Style()
+        style.configure("SeedChange.TButton", font=('Arial', 11, 'bold'), padding=8)
 
         def change_seed():
             selection = listbox.curselection()
@@ -141,13 +162,83 @@ class TournamentApp:
             index = selection[0]
             player = self.data["players"][index]
 
-            new_seed = simpledialog.askinteger("Change Seed", f"Enter new seed for {player['name']} (1 = stronger, 2 = strong):", minvalue=1, maxvalue=2)
+            # Use the custom beautiful dialog
+            new_seed = self.ask_seed(seed_window, player["name"], player["seed"])
             if new_seed in (1, 2):
                 self.data["players"][index]["seed"] = new_seed
                 self.save_data()
                 refresh_list()
 
-        ttk.Button(seed_window, text="Change Selected Player's Seed", command=change_seed, style="Start.TButton").pack(pady=5)
+        # Place the button in its own frame to control placement
+        button_frame = tk.Frame(card, bg="#f8f6ff")
+        button_frame.pack(pady=(10, 10))
+        ttk.Button(
+            button_frame,
+            text="Change Selected Player's Seed",
+            command=change_seed,
+            style="SeedChange.TButton"
+        ).pack(ipadx=8)
+
+        # Optional: Footer hint
+        tk.Label(
+            card, text="Tip: 1 = stronger, 2 = strong",
+            font=('Arial', 9), bg="#f8f6ff", fg="#888"
+        ).pack(side=tk.BOTTOM, pady=(4, 12))
+
+
+    def ask_seed(self, parent, player_name, current_seed):
+        dialog = tk.Toplevel(parent)
+        dialog.title("Change Seed")
+        dialog.geometry("340x270")  # Increased height
+        dialog.configure(bg="#eaf0fb")
+        dialog.grab_set()
+        dialog.resizable(False, False)
+        dialog.transient(parent)
+
+        # Card frame - pack fills dialog
+        card = tk.Frame(dialog, bg="#f8f6ff", bd=3, relief="ridge")
+        card.pack(expand=True, fill=tk.BOTH, padx=14, pady=14)
+
+        # Title
+        tk.Label(
+            card, text=f"Seed for {player_name}", font=('Arial', 14, 'bold'),
+            bg="#f8f6ff", fg="#5433a3"
+        ).pack(pady=(18, 7))
+
+        # Radio buttons for seed selection
+        var = tk.IntVar(value=current_seed)
+        radio_frame = tk.Frame(card, bg="#f8f6ff")
+        radio_frame.pack(pady=10)
+
+        tk.Radiobutton(
+            radio_frame, text="1 (Stronger)", variable=var, value=1,
+            font=('Arial', 12, 'bold'), bg="#e2f3fa", fg="#0c457d",
+            selectcolor="#b0e3ff", indicatoron=0, width=16, pady=7, bd=2, relief="groove", anchor="w"
+        ).pack(pady=7)
+        tk.Radiobutton(
+            radio_frame, text="2 (Strong)", variable=var, value=2,
+            font=('Arial', 12, 'bold'), bg="#fae2fa", fg="#7d0c69",
+            selectcolor="#edc6f8", indicatoron=0, width=16, pady=7, bd=2, relief="groove", anchor="w"
+        ).pack(pady=7)
+
+        # Button frame
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
+        btn_frame.pack(pady=18)
+
+        result = {"seed": None}
+
+        def confirm():
+            result["seed"] = var.get()
+            dialog.destroy()
+
+        def cancel():
+            dialog.destroy()
+
+        ttk.Button(btn_frame, text="Cancel", command=cancel, style="Draw.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+        ttk.Button(btn_frame, text="OK", command=confirm, style="Start.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+
+        dialog.wait_window()
+        return result["seed"]
 
     def start_tournament(self):
         selected = self.player_listbox.curselection()
