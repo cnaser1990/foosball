@@ -487,11 +487,89 @@ class TournamentApp:
     def show_scores(self):
         score_window = tk.Toplevel(self.root)
         score_window.title("Current Scores")
-        ttk.Label(score_window, text="Team Scores", font=('Arial', 14)).pack(pady=10)
+        score_window.geometry("540x480")
+        score_window.configure(bg="#ede7f6")
 
+        # Card frame
+        card = tk.Frame(score_window, bg="#f8f6ff", bd=3, relief="ridge")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.93)
+
+        # Header
+        header = tk.Label(
+            card,
+            text="Team Scores",
+            font=('Arial', 19, 'bold'),
+            bg="#9265df",
+            fg="white",
+            pady=18,
+            bd=2,
+            relief="groove"
+        )
+        header.pack(fill=tk.X, padx=0, pady=(0, 10))
+
+        # Table headers
+        table_frame = tk.Frame(card, bg="#f8f6ff")
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
+        header_row = tk.Frame(table_frame, bg="#ede7f6")
+        header_row.pack(fill=tk.X)
+        tk.Label(header_row, text="Rank", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=6, anchor="w").pack(side=tk.LEFT, padx=(3,0))
+        tk.Label(header_row, text="Team", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=26, anchor="w").pack(side=tk.LEFT, padx=(5,0))
+        tk.Label(header_row, text="Points", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=7, anchor="e").pack(side=tk.LEFT, padx=(6,0))
+
+        # Listbox with scrollbar
+        lb_frame = tk.Frame(table_frame, bg="#f8f6ff")
+        lb_frame.pack(fill=tk.BOTH, expand=True, pady=(0,8))
+
+        listbox = tk.Listbox(
+            lb_frame,
+            font=('DejaVu Sans Mono', 13, 'bold'),
+            bg="#f8f6ff",
+            fg="#111",
+            width=48,
+            height=14,
+            bd=0,
+            selectbackground="#d1c4e9",
+            activestyle='none',
+            highlightthickness=0,
+
+        )
+        listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Prepare and sort teams by score DESC, then name
+        team_scores = []
         for idx, score in self.scores.items():
             team = " & ".join(self.teams[idx])
-            ttk.Label(score_window, text=f"{team}: {score} points", font=('Arial', 12)).pack(pady=5)
+            team_scores.append((team, score))
+        sorted_teams = sorted(team_scores, key=lambda x: (-x[1], x[0]))
+
+        # Color for top 3
+        row_colors = [
+            ("#ffe082", "#111"),   # gold bg, black text
+            ("#e0e0e0", "#111"),   # silver bg, black text
+            ("#ffccbc", "#111")    # bronze bg, black text
+        ]
+
+        for idx, (team, score) in enumerate(sorted_teams, start=1):
+            line = f"{str(idx):>2}   {team:<28} {str(score).rjust(6)}"
+            listbox.insert(tk.END, line)
+            if idx <= 3:
+                bg, fg = row_colors[idx-1]
+                listbox.itemconfig(tk.END, bg=bg, fg=fg)
+
+        # Footer/hint
+        tk.Label(
+            card,
+            font=('Arial', 9),
+            bg="#f8f6ff",
+            fg="#7b58d3"
+        ).pack(pady=(0, 9))
+
+        ttk.Button(
+            card,
+            text="Close",
+            command=score_window.destroy,
+            style="Draw.TButton"
+        ).pack(pady=(0, 8))
 
     def finalize_tournament(self):
         if self.postponed:
@@ -551,42 +629,88 @@ class TournamentApp:
     def show_champions(self):
         champ_window = tk.Toplevel(self.root)
         champ_window.title("Championship Records")
-        champ_window.geometry("350x400")
-        ttk.Label(champ_window, text="🏆 Championship Leaderboard 🏆", font=('Arial', 16, 'bold')).pack(pady=15, padx=15)
+        champ_window.geometry("420x480")
+        champ_window.configure(bg="#ede7f6")
 
-        # Prepare sorted data (descending by championships, then by name)
+        # Card frame
+        card = tk.Frame(champ_window, bg="#f8f6ff", bd=3, relief="ridge")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.93, relheight=0.93)
+
+        # Header
+        header = tk.Label(
+            card,
+            text="Championship Leaderboard",
+            font=('Arial', 19, 'bold'),
+            bg="#9265df",
+            fg="white",
+            pady=18,
+            bd=2,
+            relief="groove"
+        )
+        header.pack(fill=tk.X, padx=0, pady=(0, 10))
+
+        # Table headers
+        table_frame = tk.Frame(card, bg="#f8f6ff")
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 12))
+        header_row = tk.Frame(table_frame, bg="#ede7f6")
+        header_row.pack(fill=tk.X)
+        # Use monospace font for "Rank" so it aligns with numbers below
+        tk.Label(header_row, text="Rank", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=6, anchor="w").pack(side=tk.LEFT, padx=(2,0))
+        tk.Label(header_row, text="Player", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=16, anchor="w").pack(side=tk.LEFT, padx=(10,0))
+        tk.Label(header_row, text="Wins", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=7, anchor="e").pack(side=tk.LEFT, padx=(8,0))
+
+        # Listbox with scrollbar
+        lb_frame = tk.Frame(table_frame, bg="#f8f6ff")
+        lb_frame.pack(fill=tk.BOTH, expand=True, pady=(0,8))
+
+        # Use monospace font for alignment
+        listbox = tk.Listbox(
+            lb_frame,
+            font=('DejaVu Sans Mono', 13, 'bold'),
+            bg="#f8f6ff",
+            fg="#111",
+            width=36,
+            height=13,
+            bd=0,
+            selectbackground="#d1c4e9",
+            activestyle='none',
+            highlightthickness=0,
+        )
+
+        listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Background colors for top 3
+        row_colors = [
+            ("#ffe082", "#111"),   # 1st: gold bg, black text
+            ("#e0e0e0", "#111"),   # 2nd: silver bg, black text
+            ("#ffccbc", "#111")    # 3rd: bronze bg, black text
+        ]
+
         sorted_champs = sorted(
             self.data["championships"].items(),
             key=lambda x: (-x[1], x[0])
         )
-
-        # Set up a Treeview for a nice table display
-        columns = ("#1", "Player", "Titles")
-        tree = ttk.Treeview(champ_window, columns=columns, show="headings", height=12)
-        tree.heading("#1", text="Rank")
-        tree.heading("Player", text="Player")
-        tree.heading("Titles", text="Championships")
-
-        # Set column widths
-        tree.column("#1", width=50, anchor="center")
-        tree.column("Player", width=150, anchor="center")
-        tree.column("Titles", width=120, anchor="center")
-
-        # Add data to the Treeview
         for idx, (player, count) in enumerate(sorted_champs, start=1):
-            medal = ""
-            if idx == 1:
-                medal = "🥇 "
-            elif idx == 2:
-                medal = "🥈 "
-            elif idx == 3:
-                medal = "🥉 "
-            tree.insert("", "end", values=(f"{idx}", f"{medal}{player}", count))
+            line = f"{str(idx):>2}   {player:<15} {str(count).rjust(6)}"
+            listbox.insert(tk.END, line)
+            if idx <= 3:
+                bg, fg = row_colors[idx-1]
+                listbox.itemconfig(tk.END, bg=bg, fg=fg)
 
-        tree.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
+        # Footer/hint
+        tk.Label(
+            card,
+            font=('Arial', 9),
+            bg="#f8f6ff",
+            fg="#7b58d3"
+        ).pack(pady=(0, 9))
 
-        # Optional: Add a close button
-        ttk.Button(champ_window, text="Close", command=champ_window.destroy, style="Draw.TButton").pack(pady=10)
+        ttk.Button(
+            card,
+            text="Close",
+            command=champ_window.destroy,
+            style="Draw.TButton"
+        ).pack(pady=(0, 8))
 
     def clear_window(self):
         for widget in self.root.winfo_children():
