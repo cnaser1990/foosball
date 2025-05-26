@@ -179,28 +179,54 @@ class TournamentApp:
         t1, t2 = self.matches[self.current_match_index]
         team1 = self.teams[t1]
         team2 = self.teams[t2]
+        match_num = self.current_match_index + 1
+        total_matches = len(self.matches)
 
-        match_frame = ttk.Frame(self.root)
-        match_frame.pack(expand=True, fill='both', padx=20, pady=20)
+        # Set root background for consistency
+        self.root.configure(bg="#e9e9e9")
+        
+        # Main frame uses all available space
+        match_frame = tk.Frame(self.root, bg="#e9e9e9")
+        match_frame.pack(expand=True, fill='both')
 
-        ttk.Label(match_frame, text="Current Match", font=('Arial', 14)).pack(pady=10)
+        # Card-like frame, fills much of the window
+        card = tk.Frame(match_frame, bg="#f7f5fa", bd=4, relief="ridge")
+        card.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.88, relheight=0.78)
 
-        vs_frame = ttk.Frame(match_frame)
-        vs_frame.pack(pady=20)
+        # Match info
+        tk.Label(card, text=f"Match {match_num} of {total_matches}", font=('Arial', 13, 'bold'), bg="#f7f5fa", fg="#555").pack(pady=(18, 8))
 
-        ttk.Label(vs_frame, text=" vs ".join(team1), font=('Arial', 12)).pack(side=tk.LEFT)
-        ttk.Label(vs_frame, text=" VS ", font=('Arial', 14, 'bold')).pack(side=tk.LEFT, padx=20)
-        ttk.Label(vs_frame, text=" vs ".join(team2), font=('Arial', 12)).pack(side=tk.LEFT)
+        # Team vs Team display (centered & bold)
+        vs_frame = tk.Frame(card, bg="#f7f5fa")
+        vs_frame.pack(pady=25)
 
-        btn_frame = ttk.Frame(match_frame)
-        btn_frame.pack(pady=20)
+        def format_team(team):
+            return " & ".join(team)
 
-        ttk.Button(btn_frame, text="Team 1 Wins", command=lambda: self.record_result(t1, t2, '1'), style="Team1.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Team 2 Wins", command=lambda: self.record_result(t1, t2, '2'), style="Team2.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Draw", command=lambda: self.record_result(t1, t2, 'd'), style="Draw.TButton").pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Postpone", command=self.postpone_match, style="Postpone.TButton").pack(side=tk.LEFT, padx=5)
+        tk.Label(
+            vs_frame, text=format_team(team1), font=('Arial', 18, 'bold'),
+            bg="#d3eafd", fg="#183153", padx=18, pady=5, bd=2, relief="groove"
+        ).pack(side=tk.LEFT, padx=(0, 18))
+        tk.Label(
+            vs_frame, text="VS", font=('Arial', 20, 'bold'),
+            bg="#f7f5fa", fg="#9C27B0", padx=10
+        ).pack(side=tk.LEFT)
+        tk.Label(
+            vs_frame, text=format_team(team2), font=('Arial', 18, 'bold'),
+            bg="#ffd3d3", fg="#8B2323", padx=18, pady=5, bd=2, relief="groove"
+        ).pack(side=tk.LEFT, padx=(18, 0))
 
-        ttk.Button(match_frame, text="View Scores", command=self.show_scores, style="Scores.TButton").pack(pady=10)
+        # Buttons with good spacing
+        btn_frame = tk.Frame(card, bg="#f7f5fa")
+        btn_frame.pack(pady=28)
+
+        ttk.Button(btn_frame, text="Team 1 Wins", command=lambda: self.record_result(t1, t2, '1'), style="Team1.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
+        ttk.Button(btn_frame, text="Team 2 Wins", command=lambda: self.record_result(t1, t2, '2'), style="Team2.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
+        ttk.Button(btn_frame, text="Draw", command=lambda: self.record_result(t1, t2, 'd'), style="Draw.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
+        ttk.Button(btn_frame, text="Postpone", command=self.postpone_match, style="Postpone.TButton").pack(side=tk.LEFT, padx=14, ipadx=12, ipady=7)
+
+        # View scores button at the bottom
+        ttk.Button(card, text="View Scores", command=self.show_scores, style="Scores.TButton").pack(pady=(18, 12))
 
     def record_result(self, t1, t2, result):
         if result == '1':
