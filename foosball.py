@@ -26,6 +26,7 @@ class TournamentApp:
 
     def configure_button_styles(self):
         style = ttk.Style()
+        style.theme_use("clam")
         style.configure("Add.TButton", background="#2196F3", foreground="black", font=('Arial', 10))
         style.configure("Start.TButton", background="#4CAF50", foreground="black", font=('Arial', 10))
         style.configure("Champions.TButton", background="#d47cf7", foreground="black", font=('Arial', 10))
@@ -35,7 +36,18 @@ class TournamentApp:
         style.configure("Postpone.TButton", background="#F57C00", foreground="white", font=('Arial', 10))
         style.configure("Scores.TButton", background="#009688", foreground="white", font=('Arial', 10))
         style.configure("Seed.TButton", background="#f59f69", foreground="black", font=('Arial', 10))
+        style.configure("DialogGreen.TButton", background="#4CAF50", foreground="white")
+        style.map("DialogGreen.TButton",
+            background=[('active', '#43a047')],
+            foreground=[('active', 'white')]
+        )
 
+        style.configure("DialogRed.TButton", background="#D32F2F", foreground="white")
+        style.map("DialogRed.TButton",
+            background=[('active', '#b71c1c')],
+            foreground=[('active', 'white')]
+        )
+    
     def load_data(self):
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, "r") as f:
@@ -94,7 +106,7 @@ class TournamentApp:
                 foreground=[('active', '#fff')],
                 background=[('active', '#7a83fa')])
 
-        ttk.Button(btn_frame, text="Add Player", command=self.add_player, style="Add.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
+        ttk.Button(btn_frame, text="Add/Remove Player", command=self.manage_players, style="Add.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
         ttk.Button(btn_frame, text="Start Tournament", command=self.start_tournament, style="Start.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
         ttk.Button(btn_frame, text="View Champions", command=self.show_champions, style="Champions.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
         ttk.Button(btn_frame, text="Manage Seeds", command=self.manage_seeds, style="Seed.TButton").pack(side=tk.LEFT, padx=8, ipadx=10)
@@ -105,16 +117,120 @@ class TournamentApp:
             font=('Arial', 9), bg="#f8f6ff", fg="#888"
         ).pack(side=tk.BOTTOM, pady=(6, 10))
 
-    def add_player(self):
-        name = simpledialog.askstring("Add Player", "Enter player name:")
-        if name and not any(p["name"] == name for p in self.data["players"]):
-            seed = simpledialog.askinteger("Player Seed", "Enter player seed (1 for stronger, 2 for strong):", minvalue=1, maxvalue=2)
-            if seed in (1, 2):
-                self.data["players"].append({"name": name, "seed": seed})
-                self.data["championships"][name] = 0
-                self.player_listbox.insert(tk.END, name)
-                self.save_data()
+    def manage_players(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Add/Remove Player")
+        dialog.geometry("510x390")
+        dialog.configure(bg="#eaf0fb")
+        dialog.grab_set()
+        dialog.resizable(False, False)
+        dialog.transient(self.root)
 
+        card = tk.Frame(dialog, bg="#f8f6ff", bd=3, relief="ridge")
+        card.pack(expand=True, fill=tk.BOTH, padx=18, pady=18)
+
+        tk.Label(
+            card, text="Add / Remove Players", font=('Arial', 16, 'bold'),
+            bg="#f8f6ff", fg="#5433a3"
+        ).pack(pady=(12, 8))
+
+        # Listbox with scrollbar to show current players
+        listbox_frame = tk.Frame(card, bg="#cfd8ff", bd=2, relief="groove")
+        listbox_frame.pack(pady=(0, 12), padx=18, fill=tk.BOTH, expand=True)
+
+        scrollbar = tk.Scrollbar(listbox_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        player_listbox = tk.Listbox(
+            listbox_frame, selectmode=tk.MULTIPLE, height=7, font=('Segoe UI', 12),
+            bg="#f8f6ff", fg="#222",
+            selectbackground="#a4b0ff", activestyle='none', relief='flat',
+            yscrollcommand=scrollbar.set
+        )
+        player_listbox.pack(padx=6, pady=6, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=player_listbox.yview)
+
+        def refresh_players():
+            player_listbox.delete(0, tk.END)
+            for player in self.data["players"]:
+                player_listbox.insert(tk.END, f"{player['name']} (Seed {player['seed']})")
+        refresh_players()
+
+        # --- Add Player Section ---
+        entry_frame = tk.Frame(card, bg="#f8f6ff")
+        entry_frame.pack(pady=(6, 10))
+
+        tk.Label(entry_frame, text="New Player Name:", font=('Arial', 11), bg="#f8f6ff").pack(side=tk.LEFT, padx=(0, 8))
+        name_var = tk.StringVar()
+        name_entry = tk.Entry(entry_frame, textvariable=name_var, font=('Arial', 11), width=16)
+        name_entry.pack(side=tk.LEFT, padx=(0, 12))
+        name_entry.focus_set()
+
+        tk.Label(entry_frame, text="Seed:", font=('Arial', 11), bg="#f8f6ff").pack(side=tk.LEFT, padx=(0, 5))
+        seed_var = tk.IntVar(value=1)
+        seed1 = tk.Radiobutton(
+            entry_frame, text="1", variable=seed_var, value=1,
+            font=('Arial', 11, 'bold'), bg="#e2f3fa", fg="#0c457d",
+            selectcolor="#b0e3ff", indicatoron=0, width=3, pady=4, bd=2, relief="groove"
+        )
+        seed1.pack(side=tk.LEFT, padx=(0, 2))
+        seed2 = tk.Radiobutton(
+            entry_frame, text="2", variable=seed_var, value=2,
+            font=('Arial', 11, 'bold'), bg="#fae2fa", fg="#7d0c69",
+            selectcolor="#edc6f8", indicatoron=0, width=3, pady=4, bd=2, relief="groove"
+        )
+        seed2.pack(side=tk.LEFT, padx=(2, 0))
+
+        # --- Buttons ---
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
+        btn_frame.pack(pady=10)
+
+        style = ttk.Style()
+        style.configure("DialogGreen.TButton", font=('Arial', 11, 'bold'), padding=8)
+        style.configure("DialogRed.TButton", font=('Arial', 11, 'bold'), padding=8)
+        style.configure("DialogGray.TButton", font=('Arial', 11, 'bold'), padding=8)
+
+        def add_player_action():
+            name = name_var.get().strip()
+            if not name:
+                messagebox.showwarning("Input Error", "Player name cannot be empty.", parent=dialog)
+                return
+            if any(p["name"] == name for p in self.data["players"]):
+                messagebox.showwarning("Duplicate Name", f"Player '{name}' already exists!", parent=dialog)
+                return
+            seed = seed_var.get()
+            self.data["players"].append({"name": name, "seed": seed})
+            self.data["championships"][name] = 0
+            refresh_players()
+            name_var.set("")
+            self.save_data()
+            # Update main window's player listbox if it exists
+            if hasattr(self, "player_listbox"):
+                self.player_listbox.delete(0, tk.END)
+                for player in self.data["players"]:
+                    self.player_listbox.insert(tk.END, player["name"])
+
+        def remove_player_action():
+            selection = player_listbox.curselection()
+            if not selection:
+                messagebox.showwarning("No Selection", "Please select player(s) to remove.", parent=dialog)
+                return
+            to_remove = [player_listbox.get(i).split(" (Seed")[0] for i in selection]
+            if not messagebox.askyesno("Remove Player", f"Are you sure you want to remove the selected player(s)?", parent=dialog):
+                return
+            self.data["players"] = [p for p in self.data["players"] if p["name"] not in to_remove]
+            for name in to_remove:
+                self.data["championships"].pop(name, None)
+            refresh_players()
+            self.save_data()
+            if hasattr(self, "player_listbox"):
+                self.player_listbox.delete(0, tk.END)
+                for player in self.data["players"]:
+                    self.player_listbox.insert(tk.END, player["name"])
+
+        ttk.Button(btn_frame, text="Remove Selected Player(s)", command=remove_player_action, style="DialogRed.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
+        ttk.Button(btn_frame, text="Add Player", command=add_player_action, style="DialogGreen.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
+ 
     def manage_seeds(self):
         seed_window = tk.Toplevel(self.root)
         seed_window.title("Manage Player Seeds")
@@ -184,7 +300,6 @@ class TournamentApp:
             card, text="Tip: 1 = stronger, 2 = strong",
             font=('Arial', 9), bg="#f8f6ff", fg="#888"
         ).pack(side=tk.BOTTOM, pady=(4, 12))
-
 
     def ask_seed(self, parent, player_name, current_seed):
         dialog = tk.Toplevel(parent)
