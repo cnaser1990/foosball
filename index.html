@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foosball Tournament Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Main Menu Screen -->
+        <div id="main-screen" class="screen active">
+            <div class="card">
+                <h1 class="main-title">Foosball Tournament Manager</h1>
+                <h2 class="subtitle">Select Players</h2>
+                
+                <div class="listbox-frame">
+                    <select id="player-listbox" multiple size="11">
+                        <!-- Players will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="button-frame">
+                    <button id="manage-players-btn" class="btn btn-add">Add/Remove Player</button>
+                    <button id="start-tournament-btn" class="btn btn-start">Start Tournament</button>
+                    <button id="view-champions-btn" class="btn btn-champions">View Champions</button>
+                    <button id="manage-seeds-btn" class="btn btn-seed">Manage Seeds</button>
+                </div>
+                
+                <p class="tip">Tip: Hold Ctrl (Cmd on Mac) to select multiple players</p>
+            </div>
+        </div>
+
+        <!-- Player Management Dialog -->
+        <div id="player-management-dialog" class="dialog">
+            <div class="dialog-content">
+                <h2>Add / Remove Players</h2>
+                
+                <div class="listbox-frame">
+                    <select id="manage-player-listbox" multiple size="7">
+                        <!-- Players will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="entry-frame">
+                    <label for="new-player-name">New Player Name:</label>
+                    <input type="text" id="new-player-name" placeholder="Enter name">
+                    
+                    <label>Seed:</label>
+                    <div class="seed-options">
+                        <input type="radio" id="seed-1" name="seed" value="1" checked>
+                        <label for="seed-1" class="seed-btn seed-1">1</label>
+                        <input type="radio" id="seed-2" name="seed" value="2">
+                        <label for="seed-2" class="seed-btn seed-2">2</label>
+                        <input type="radio" id="seed-3" name="seed" value="3">
+                        <label for="seed-3" class="seed-btn seed-3">3</label>
+                    </div>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="remove-player-btn" class="btn btn-red">Remove Selected Player(s)</button>
+                    <button id="add-player-btn" class="btn btn-green">Add Player</button>
+                    <button id="close-player-dialog-btn" class="btn btn-gray">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seed Management Dialog -->
+        <div id="seed-management-dialog" class="dialog">
+            <div class="dialog-content">
+                <h2>Players and Seeds</h2>
+                
+                <div class="listbox-frame">
+                    <select id="seed-player-listbox" size="10">
+                        <!-- Players will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="change-seed-btn" class="btn btn-seed">Change Selected Player's Seed</button>
+                    <button id="close-seed-dialog-btn" class="btn btn-gray">Close</button>
+                </div>
+                
+                <p class="tip">Tip: 1 = stronger, 2 = strong, 3 = beginner</p>
+            </div>
+        </div>
+
+        <!-- Team Mode Selection Dialog -->
+        <div id="team-mode-dialog" class="dialog">
+            <div class="dialog-content">
+                <h2>How would you like to form teams?</h2>
+                
+                <div class="team-mode-options">
+                    <input type="radio" id="random-teams" name="team-mode" value="random" checked>
+                    <label for="random-teams" class="team-mode-btn">Random Teams</label>
+                    
+                    <input type="radio" id="seeded-teams" name="team-mode" value="seed">
+                    <label for="seeded-teams" class="team-mode-btn">Seeded Teams</label>
+                    
+                    <input type="radio" id="custom-teams" name="team-mode" value="custom">
+                    <label for="custom-teams" class="team-mode-btn">Custom Teams (Manual Selection)</label>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="cancel-team-mode-btn" class="btn btn-gray">Cancel</button>
+                    <button id="continue-team-mode-btn" class="btn btn-start">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Team Builder Dialog -->
+        <div id="custom-team-dialog" class="dialog">
+            <div class="dialog-content large">
+                <h2>Build Teams (2 Players per Team)</h2>
+                
+                <div class="team-builder">
+                    <div class="available-players">
+                        <h3>Available Players</h3>
+                        <select id="available-players-listbox" multiple size="18">
+                            <!-- Players will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <div class="teams-list">
+                        <h3>Teams</h3>
+                        <select id="teams-listbox" size="18">
+                            <!-- Teams will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="add-team-btn" class="btn btn-start">Add Team</button>
+                    <button id="remove-team-btn" class="btn btn-gray">Remove Team</button>
+                    <button id="cancel-custom-team-btn" class="btn btn-gray">Cancel</button>
+                    <button id="done-custom-team-btn" class="btn btn-start">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Screen -->
+        <div id="match-screen" class="screen">
+            <div class="match-card">
+                <div id="match-badge" class="match-badge">Match 1/6</div>
+                
+                <div class="vs-frame">
+                    <div id="team1-label" class="team-label team1">Team 1</div>
+                    <div class="vs-label">VS</div>
+                    <div id="team2-label" class="team-label team2">Team 2</div>
+                </div>
+                
+                <div class="score-frame">
+                    <div class="score-box">
+                        <label>Goals Team 1</label>
+                        <div class="score-input">
+                            <button class="score-btn" id="team1-minus">−</button>
+                            <input type="number" id="team1-goals" value="0" min="0">
+                            <button class="score-btn" id="team1-plus">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="score-box">
+                        <label>Goals Team 2</label>
+                        <div class="score-input">
+                            <button class="score-btn" id="team2-minus">−</button>
+                            <input type="number" id="team2-goals" value="0" min="0">
+                            <button class="score-btn" id="team2-plus">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-buttons">
+                    <button id="submit-result-btn" class="btn btn-result">✔ Submit Result</button>
+                    <button id="postpone-match-btn" class="btn btn-postpone">⏸ Postpone</button>
+                </div>
+                
+                <button id="view-scores-btn" class="btn btn-scores">View Scores</button>
+                
+                <p class="match-tip">Tip: Use + / − or type to adjust goals, then press ✔</p>
+            </div>
+        </div>
+
+        <!-- Tiebreaker Screen -->
+        <div id="tiebreaker-screen" class="screen">
+            <div class="match-card">
+                <div class="match-badge tiebreaker">⚡ Final Tiebreaker!</div>
+                
+                <div class="vs-frame">
+                    <div id="tie-team1-label" class="team-label team1">Team 1</div>
+                    <div class="vs-label tie">VS</div>
+                    <div id="tie-team2-label" class="team-label team2">Team 2</div>
+                </div>
+                
+                <div class="score-frame">
+                    <div class="score-box">
+                        <label>Goals Team 1</label>
+                        <div class="score-input">
+                            <button class="score-btn" id="tie-team1-minus">−</button>
+                            <input type="number" id="tie-team1-goals" value="0" min="0">
+                            <button class="score-btn" id="tie-team1-plus">+</button>
+                        </div>
+                    </div>
+                    
+                    <div class="score-box">
+                        <label>Goals Team 2</label>
+                        <div class="score-input">
+                            <button class="score-btn" id="tie-team2-minus">−</button>
+                            <input type="number" id="tie-team2-goals" value="0" min="0">
+                            <button class="score-btn" id="tie-team2-plus">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="match-buttons">
+                    <button id="declare-winner-btn" class="btn btn-result">🏆 Declare Winner</button>
+                </div>
+                
+                <p class="match-tip tiebreaker">Tip: Use + / − or type to adjust goals. Draws are not allowed in the final.</p>
+            </div>
+        </div>
+
+        <!-- Scores Dialog -->
+        <div id="scores-dialog" class="dialog">
+            <div class="dialog-content large">
+                <div class="scores-header">Team Scores</div>
+                
+                <div class="scores-table">
+                    <div class="scores-header-row">
+                        <div class="col-rank">Rk</div>
+                        <div class="col-team">Team</div>
+                        <div class="col-pts">Pts</div>
+                        <div class="col-gf">GF</div>
+                        <div class="col-ga">GA</div>
+                        <div class="col-gd">GD</div>
+                    </div>
+                    <div id="scores-list" class="scores-list">
+                        <!-- Scores will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="close-scores-btn" class="btn btn-gray">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Champions Dialog -->
+        <div id="champions-dialog" class="dialog">
+            <div class="dialog-content">
+                <div class="champions-header">Championship Leaderboard</div>
+                
+                <div class="champions-table">
+                    <div class="champions-header-row">
+                        <div class="col-rank">Rank</div>
+                        <div class="col-player">Player</div>
+                        <div class="col-wins">Wins</div>
+                    </div>
+                    <div id="champions-list" class="champions-list">
+                        <!-- Champions will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="close-champions-btn" class="btn btn-gray">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seed Change Dialog -->
+        <div id="seed-change-dialog" class="dialog">
+            <div class="dialog-content">
+                <h2 id="seed-change-title">Seed for Player</h2>
+                
+                <div class="seed-change-options">
+                    <input type="radio" id="change-seed-1" name="change-seed" value="1">
+                    <label for="change-seed-1" class="seed-change-btn seed-1">1 (Stronger)</label>
+                    
+                    <input type="radio" id="change-seed-2" name="change-seed" value="2">
+                    <label for="change-seed-2" class="seed-change-btn seed-2">2 (Strong)</label>
+                    
+                    <input type="radio" id="change-seed-3" name="change-seed" value="3">
+                    <label for="change-seed-3" class="seed-change-btn seed-3">3 (Beginner)</label>
+                </div>
+                
+                <div class="dialog-buttons">
+                    <button id="cancel-seed-change-btn" class="btn btn-gray">Cancel</button>
+                    <button id="ok-seed-change-btn" class="btn btn-start">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -334,6 +334,7 @@ class TournamentApp:
         dialog.wait_window()
         return result["seed"]
 
+    # ---- START TOURNAMENT MODIFIED ----
     def start_tournament(self):
         selected = self.player_listbox.curselection()
         if not selected:
@@ -343,10 +344,162 @@ class TournamentApp:
         selected_names = [self.player_listbox.get(i) for i in selected]
         self.current_players = [p for p in self.data["players"] if p["name"] in selected_names]
 
-        use_seed = messagebox.askyesno("Use Seeding?", "Do you want to use seeding to create balanced teams?")
-        self.create_teams(use_seed)
-        self.create_matches()
-        self.show_match()
+        # Ask for team creation method
+        team_mode = self.ask_team_mode()
+        if team_mode is None:
+            return  # Cancelled
+
+        if team_mode == "seed":
+            self.create_teams(use_seed=True)
+            self.create_matches()
+            self.show_match()
+        elif team_mode == "random":
+            self.create_teams(use_seed=False)
+            self.create_matches()
+            self.show_match()
+        elif team_mode == "custom":
+            if not self.custom_team_builder():
+                return  # cancelled
+            self.create_matches()
+            self.show_match()
+
+    # ---- TEAM MODE CHOICE DIALOG ----
+    def ask_team_mode(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Team Formation Mode")
+        dialog.geometry("500x500")
+        dialog.configure(bg="#eaf0fb")
+        dialog.grab_set()
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+
+        card = tk.Frame(dialog, bg="#f8f6ff", bd=3, relief="ridge")
+        card.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
+
+        tk.Label(card, text="How would you like to form teams?", font=('Arial', 14, 'bold'), bg="#f8f6ff", fg="#5433a3").pack(pady=(12, 14))
+
+        choice = tk.StringVar(value="random")
+
+        opt1 = ttk.Radiobutton(card, text="Random Teams", variable=choice, value="random", style="Start.TButton")
+        opt1.pack(anchor="w", padx=22, pady=8)
+        opt2 = ttk.Radiobutton(card, text="Seeded Teams", variable=choice, value="seed", style="Seed.TButton")
+        opt2.pack(anchor="w", padx=22, pady=8)
+        opt3 = ttk.Radiobutton(card, text="Custom Teams (Manual Selection)", variable=choice, value="custom", style="Champions.TButton")
+        opt3.pack(anchor="w", padx=22, pady=8)
+
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
+        btn_frame.pack(pady=18)
+
+        result = {"mode": None}
+
+        def done():
+            result["mode"] = choice.get()
+            dialog.destroy()
+        def cancel():
+            dialog.destroy()
+
+        ttk.Button(btn_frame, text="Cancel", command=cancel, style="Draw.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+        ttk.Button(btn_frame, text="Continue", command=done, style="Start.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+
+        dialog.wait_window()
+        return result["mode"]
+
+    # ---- CUSTOM TEAM BUILDER ----
+    def custom_team_builder(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Create Custom Teams")
+        dialog.geometry("700x600")
+        dialog.configure(bg="#eaf0fb")
+        dialog.grab_set()
+        dialog.transient(self.root)
+        dialog.resizable(False, False)
+
+        card = tk.Frame(dialog, bg="#f8f6ff", bd=3, relief="ridge")
+        card.pack(expand=True, fill=tk.BOTH, padx=10, pady=10)
+
+        tk.Label(card, text="Build Teams (2 Players per Team)", font=('Arial', 15, 'bold'), bg="#f8f6ff", fg="#5433a3").pack(pady=(10, 8))
+
+        remaining_players = [p["name"] for p in self.current_players]
+        teams = []
+
+        frame = tk.Frame(card, bg="#f8f6ff")
+        frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        left = tk.Frame(frame, bg="#f8f6ff")
+        left.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(14,7))
+        right = tk.Frame(frame, bg="#f8f6ff")
+        right.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(7,14))
+
+        tk.Label(left, text="Available Players", font=('Arial', 12, 'bold'), bg="#f8f6ff", fg="#6a1b9a").pack(pady=(0,3))
+        avail_lb = tk.Listbox(left, selectmode=tk.MULTIPLE, height=18, font=('Segoe UI', 12), bg="#f8f6ff", fg="#222", selectbackground="#b0e3ff")
+        avail_lb.pack(fill=tk.BOTH, expand=True)
+        for p in remaining_players:
+            avail_lb.insert(tk.END, p)
+
+        tk.Label(right, text="Teams", font=('Arial', 12, 'bold'), bg="#f8f6ff", fg="#6a1b9a").pack(pady=(0,3))
+        teams_lb = tk.Listbox(right, height=18, font=('Segoe UI', 12), bg="#f8f6ff", fg="#222", selectbackground="#b0e3ff")
+        teams_lb.pack(fill=tk.BOTH, expand=True)
+
+        def refresh():
+            avail_lb.delete(0, tk.END)
+            for p in remaining_players:
+                avail_lb.insert(tk.END, p)
+            teams_lb.delete(0, tk.END)
+            for t in teams:
+                teams_lb.insert(tk.END, " & ".join(t))
+
+        def add_team():
+            sel = avail_lb.curselection()
+            if len(sel) != 2:
+                messagebox.showwarning("Need 2 Players", "Select exactly 2 players for a team.", parent=dialog)
+                return
+            team = [avail_lb.get(i) for i in sel]
+            for p in team:
+                remaining_players.remove(p)
+            teams.append(tuple(team))
+            refresh()
+
+        def remove_team():
+            sel = teams_lb.curselection()
+            if not sel:
+                return
+            t = teams[sel[0]]
+            for p in t:
+                remaining_players.append(p)
+            teams.pop(sel[0])
+            refresh()
+
+        action_frame = tk.Frame(card, bg="#f8f6ff")
+        action_frame.pack(pady=(8, 5))
+        ttk.Button(action_frame, text="Add Team", command=add_team, style="Start.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
+        ttk.Button(action_frame, text="Remove Team", command=remove_team, style="Draw.TButton").pack(side=tk.LEFT, padx=12, ipadx=10)
+
+        result = {"ok": False}
+
+        def done():
+            if len(remaining_players) == 1:
+                teams.append((remaining_players[0],))
+            elif remaining_players:
+                messagebox.showwarning("Incomplete Teams", "All players must be assigned to a team (or one solo).", parent=dialog)
+                return
+            if len(teams) < 2:
+                messagebox.showwarning("Not Enough Teams", "You must create at least 2 teams.", parent=dialog)
+                return
+            self.teams = teams.copy()
+            self.team_stats = {i: {'points': 0, 'gf': 0, 'ga': 0} for i in range(len(self.teams))}
+            result["ok"] = True
+            dialog.destroy()
+
+        def cancel():
+            dialog.destroy()
+
+        btn_frame = tk.Frame(card, bg="#f8f6ff")
+        btn_frame.pack(pady=(12, 7))
+        ttk.Button(btn_frame, text="Cancel", command=cancel, style="Draw.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+        ttk.Button(btn_frame, text="Done", command=done, style="Start.TButton").pack(side=tk.LEFT, padx=18, ipadx=12)
+
+        dialog.wait_window()
+        return result["ok"]
 
     def create_teams(self, use_seed=False):
         self.teams = []
@@ -431,7 +584,7 @@ class TournamentApp:
 
         team1_label = tk.Label(
             vs_frame, text=format_team(team1),
-            font=('Arial', 19, 'bold'),
+            font=('Arial', 14, 'bold'),
             bg="#e5eaff", fg="#5433a3",
             padx=22, pady=10, bd=2, relief="groove", width=15
         )
@@ -446,7 +599,7 @@ class TournamentApp:
 
         team2_label = tk.Label(
             vs_frame, text=format_team(team2),
-            font=('Arial', 19, 'bold'),
+            font=('Arial', 14, 'bold'),
             bg="#f5e6ff", fg="#5433a3",
             padx=22, pady=10, bd=2, relief="groove", width=15
         )
@@ -615,7 +768,6 @@ class TournamentApp:
         ]
 
         for idx, (team, points, gf, ga, gd) in enumerate(sorted_teams, start=1):
-            # Visual columns: right align all numbers, left align team name
             line = f"{idx:>3}  {team:<31}  {points:>4}   {gf:>4}   {ga:>4}   {gd:>4}"
             listbox.insert(tk.END, line)
             if idx <= 3:
@@ -786,7 +938,6 @@ class TournamentApp:
 
         ttk.Button(btns_frame, text="🏆 Declare Winner", command=submit_tiebreaker, style="Result.TButton").pack(ipadx=18, ipady=7)
 
-        # Footer Hint
         tk.Label(
             card,
             text="Tip: Use + / − or type to adjust goals. Draws are not allowed in the final.",
