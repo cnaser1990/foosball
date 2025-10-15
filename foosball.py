@@ -57,8 +57,10 @@ class TournamentApp:
                 if "players" not in data:
                     data["players"] = [{"name": name, "seed": 1} for name in data.get("names", [])]
                     data.pop("names", None)
+                if "scores" not in data:
+                    data["scores"] = {player["name"]: 0 for player in data["players"]}
                 return data
-        return {"players": [], "championships": {}}
+        return {"players": [], "championships": {}, "scores": {}}
 
     def save_data(self):
         with open(DATA_FILE, "w") as f:
@@ -192,6 +194,7 @@ class TournamentApp:
             seed = seed_var.get()
             self.data["players"].append({"name": name, "seed": seed})
             self.data["championships"][name] = 0
+            self.data["scores"][name] = 0
             refresh_players()
             name_var.set("")
             self.save_data()
@@ -211,6 +214,7 @@ class TournamentApp:
             self.data["players"] = [p for p in self.data["players"] if p["name"] not in to_remove]
             for name in to_remove:
                 self.data["championships"].pop(name, None)
+                self.data["scores"].pop(name, None)
             refresh_players()
             self.save_data()
             if hasattr(self, "player_listbox"):
@@ -682,12 +686,21 @@ class TournamentApp:
         # Update points
         if g1 > g2:
             self.team_stats[t1]['points'] += 3
+            # Add goal difference to winning team's players
+            goal_diff = g1 - g2
+            for player in self.teams[t1]:
+                self.data["scores"][player] += goal_diff
         elif g2 > g1:
             self.team_stats[t2]['points'] += 3
+            # Add goal difference to winning team's players
+            goal_diff = g2 - g1
+            for player in self.teams[t2]:
+                self.data["scores"][player] += goal_diff
         else:
             self.team_stats[t1]['points'] += 1
             self.team_stats[t2]['points'] += 1
 
+        self.save_data()
         self.current_match_index += 1
         self.show_match()
 
@@ -926,6 +939,11 @@ class TournamentApp:
                 messagebox.showwarning("Draw", "Finals must have a winner!", parent=self.root)
                 return
             winner = t1 if g1 > g2 else t2
+            # Add goal difference to winning team's players
+            goal_diff = abs(g1 - g2)
+            for player in self.teams[winner]:
+                self.data["scores"][player] += goal_diff
+            self.save_data()
             self.declare_champion(winner)
 
         btns_frame = tk.Frame(card, bg="#f8f6ff")
@@ -972,6 +990,7 @@ class TournamentApp:
         header_row.pack(fill=tk.X)
         tk.Label(header_row, text="Rank", font=('DejaVu Sans Mono', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=6, anchor="w").pack(side=tk.LEFT, padx=(2,0))
         tk.Label(header_row, text="Player", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=16, anchor="w").pack(side=tk.LEFT, padx=(10,0))
+        tk.Label(header_row, text="Scores", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=8, anchor="e").pack(side=tk.LEFT, padx=(8,0))
         tk.Label(header_row, text="Wins", font=('Arial', 12, 'bold'), bg="#ede7f6", fg="#6a1b9a", width=7, anchor="e").pack(side=tk.LEFT, padx=(8,0))
 
         lb_frame = tk.Frame(table_frame, bg="#f8f6ff")
@@ -982,7 +1001,7 @@ class TournamentApp:
             font=('DejaVu Sans Mono', 13, 'bold'),
             bg="#f8f6ff",
             fg="#111",
-            width=36,
+            width=50,
             height=13,
             bd=0,
             selectbackground="#d1c4e9",
@@ -999,11 +1018,11 @@ class TournamentApp:
         ]
 
         sorted_champs = sorted(
-            self.data["championships"].items(),
-            key=lambda x: (-x[1], x[0])
+            [(player, self.data["scores"].get(player, 0), wins) for player, wins in self.data["championships"].items()],
+            key=lambda x: (-x[1], -x[2], x[0])
         )
-        for idx, (player, count) in enumerate(sorted_champs, start=1):
-            line = f"{str(idx):>2}   {player:<15} {str(count).rjust(6)}"
+        for idx, (player, score, wins) in enumerate(sorted_champs, start=1):
+            line = f"{str(idx):>2}   {player:<15} {str(score).rjust(6)} {str(wins).rjust(6)}"
             listbox.insert(tk.END, line)
             if idx <= 3:
                 bg, fg = row_colors[idx-1]

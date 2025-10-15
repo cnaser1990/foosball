@@ -64,6 +64,15 @@ app.get('/api/players', async (req, res) => {
                 "hoseinizade": 3,
                 "hajali": 2,
                 "dariushi": 3
+            },
+            scores: {
+                "ghayem": 0,
+                "elini": 0,
+                "dinparvar": 0,
+                "alivand": 0,
+                "hoseinizade": 0,
+                "hajali": 0,
+                "dariushi": 0
             }
         };
         res.json(defaultData);

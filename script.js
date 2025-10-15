@@ -46,6 +46,15 @@ class TournamentApp {
                     "hoseinizade": 3,
                     "hajali": 2,
                     "dariushi": 3
+                },
+                scores: {
+                    "ghayem": 0,
+                    "elini": 0,
+                    "dinparvar": 0,
+                    "alivand": 0,
+                    "hoseinizade": 0,
+                    "hajali": 0,
+                    "dariushi": 0
                 }
             };
         }
@@ -207,7 +216,8 @@ class TournamentApp {
         
         this.data.players.push({ name, seed: seedValue });
         this.data.championships[name] = 0;
-        
+        this.data.scores[name] = 0;
+
         await this.saveData();
         this.refreshPlayerList();
         this.refreshManagePlayerList();
@@ -234,6 +244,7 @@ class TournamentApp {
         
         toRemove.forEach(name => {
             delete this.data.championships[name];
+            delete this.data.scores[name];
         });
 
         await this.saveData();
@@ -537,8 +548,18 @@ class TournamentApp {
         // Update points
         if (g1 > g2) {
             this.teamStats[t1].points += 3;
+            // Add goal difference to winning team's players
+            const goalDiff = g1 - g2;
+            this.teams[t1].forEach(player => {
+                this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
+            });
         } else if (g2 > g1) {
             this.teamStats[t2].points += 3;
+            // Add goal difference to winning team's players
+            const goalDiff = g2 - g1;
+            this.teams[t2].forEach(player => {
+                this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
+            });
         } else {
             this.teamStats[t1].points += 1;
             this.teamStats[t2].points += 1;
@@ -663,6 +684,11 @@ class TournamentApp {
         }
         
         const winner = g1 > g2 ? this.tiebreakerTeams[0] : this.tiebreakerTeams[1];
+        // Add goal difference to winning team's players
+        const goalDiff = Math.abs(g1 - g2);
+        this.teams[winner].forEach(player => {
+            this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
+        });
         await this.declareChampion(winner);
     }
 
@@ -691,21 +717,24 @@ class TournamentApp {
         championsList.innerHTML = '';
         
         const sortedChamps = Object.entries(this.data.championships)
-            .sort(([nameA, countA], [nameB, countB]) => {
-                // Sort by count descending, then by name ascending
-                if (countB !== countA) return countB - countA;
+            .map(([player, wins]) => [player, this.data.scores[player] || 0, wins])
+            .sort(([nameA, scoreA, winsA], [nameB, scoreB, winsB]) => {
+                // Sort by score descending, then by wins descending, then by name ascending
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                if (winsB !== winsA) return winsB - winsA;
                 return nameA.localeCompare(nameB);
             });
-        
+
         console.log('Sorted champions:', sortedChamps);
-        
-        sortedChamps.forEach(([player, count], index) => {
+
+        sortedChamps.forEach(([player, score, wins], index) => {
             const row = document.createElement('div');
             row.className = 'champion-row';
             row.innerHTML = `
                 <div class="col-rank">${index + 1}</div>
                 <div class="col-player">${player}</div>
-                <div class="col-wins">${count}</div>
+                <div class="col-scores">${score}</div>
+                <div class="col-wins">${wins}</div>
             `;
             championsList.appendChild(row);
         });
