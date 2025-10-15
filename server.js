@@ -100,8 +100,8 @@ app.post('/api/players', async (req, res) => {
             console.log(`⚠️  Port ${PORT} is in use, using port ${availablePort} instead`);
         }
         
-        app.listen(availablePort, () => {
-            console.log(`🏓 Foosball Tournament Server running at http://localhost:${availablePort}`);
+        app.listen(availablePort, '0.0.0.0', () => {
+            console.log(`🏓 Foosball Tournament Server running at http://0.0.0.0:${availablePort}`);
             console.log(`🌐 Access from other devices: http://your-ip-address:${availablePort}`);
             console.log(`📄 Data stored in: ${DATA_FILE}`);
             console.log(`⏹️  Press Ctrl+C to stop the server`);
