@@ -719,9 +719,9 @@ class TournamentApp {
         const sortedChamps = Object.entries(this.data.championships)
             .map(([player, wins]) => [player, this.data.scores[player] || 0, wins])
             .sort(([nameA, scoreA, winsA], [nameB, scoreB, winsB]) => {
-                // Sort by score descending, then by wins descending, then by name ascending
-                if (scoreB !== scoreA) return scoreB - scoreA;
+                // Sort by wins descending, then by score descending, then by name ascending
                 if (winsB !== winsA) return winsB - winsA;
+                if (scoreB !== scoreA) return scoreB - scoreA;
                 return nameA.localeCompare(nameB);
             });
 
@@ -733,8 +733,8 @@ class TournamentApp {
             row.innerHTML = `
                 <div class="col-rank">${index + 1}</div>
                 <div class="col-player">${player}</div>
-                <div class="col-scores">${score}</div>
                 <div class="col-wins">${wins}</div>
+                <div class="col-scores">${score}</div>
             `;
             championsList.appendChild(row);
         });

@@ -584,10 +584,12 @@ select option:checked {
 .champions-header-row .col-rank { width: 80px; text-align: left; padding-left: 8px; }
 .champions-header-row .col-player { width: 200px; text-align: left; padding-left: 16px; }
 .champions-header-row .col-wins { width: 80px; text-align: right; padding-right: 8px; }
+.champions-header-row .col-scores { width: 80px; text-align: right; padding-right: 8px; }
 
 .champion-row .col-rank { width: 80px; text-align: left; padding-left: 8px; }
 .champion-row .col-player { width: 200px; text-align: left; padding-left: 16px; }
 .champion-row .col-wins { width: 80px; text-align: right; padding-right: 8px; }
+.champion-row .col-scores { width: 80px; text-align: right; padding-right: 8px; }
 
 .champions-list {
     max-height: 300px;
