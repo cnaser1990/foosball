@@ -197,7 +197,7 @@ def create_default_players_json():
 
 def main():
     """Main installation function"""
-    print_colored("🏓 Foosball Tournament Manager - Universal Auto Installer", 'cyan')
+    print_colored("⚽︎ Foosball Tournament Manager - Universal Auto Installer", 'cyan')
     print_colored("=" * 60, 'cyan')
     print_colored(f"🖥️  Platform: {platform.system()} {platform.release()}", 'blue')
     print_colored(f"🏗️  Architecture: {platform.machine()}", 'blue')

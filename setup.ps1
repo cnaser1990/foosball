@@ -1,7 +1,7 @@
 # Foosball Tournament Manager - PowerShell Auto Setup Script
 # This script automatically downloads and installs Node.js if needed
 
-Write-Host "🏓 Foosball Tournament Manager - PowerShell Auto Setup Script" -ForegroundColor Cyan
+Write-Host "⚽︎ Foosball Tournament Manager - PowerShell Auto Setup Script" -ForegroundColor Cyan
 Write-Host "=============================================================" -ForegroundColor Cyan
 
 # Function to install Node.js

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🏓 Foosball Tournament Manager - One-Click Launcher"
+echo "Foosball Tournament Manager - One-Click Launcher"
 echo "================================================"
 
 # Function to check if port is in use

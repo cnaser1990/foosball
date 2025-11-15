@@ -3,7 +3,7 @@
 # Foosball Tournament Manager - Auto Setup Script
 # This script automatically installs dependencies and sets up the application
 
-echo "🏓 Foosball Tournament Manager - Auto Setup Script"
+echo "⚽︎ Foosball Tournament Manager - Auto Setup Script"
 echo "=================================================="
 
 # Function to install Node.js on different systems

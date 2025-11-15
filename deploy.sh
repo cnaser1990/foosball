@@ -3,7 +3,7 @@
 # Foosball Tournament Manager - Auto Deploy Script
 # This script automatically deploys the application using Docker
 
-echo "🏓 Foosball Tournament Manager - Auto Deploy"
+echo "⚽︎ Foosball Tournament Manager - Auto Deploy"
 echo "==========================================="
 
 # Function to check if Docker is installed

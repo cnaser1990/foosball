@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-echo 🏓 Foosball Tournament Manager - One-Click Launcher
+echo ⚽︎ Foosball Tournament Manager - One-Click Launcher
 echo ================================================
 
 REM Function to check if port is in use

@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-echo 🏓 Foosball Tournament Manager - Auto Setup Script (Windows)
+echo ⚽︎ Foosball Tournament Manager - Auto Setup Script (Windows)
 echo ===========================================================
 
 REM Call the main function to start the script
