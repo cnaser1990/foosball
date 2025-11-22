@@ -1,14 +1,15 @@
 class TournamentApp {
-    constructor() {
-        this.currentPlayers = [];
-        this.teams = [];
-        this.matches = [];
-        this.postponed = [];
-        this.currentMatchIndex = 0;
-        this.teamStats = {};
-        
-        this.initializeApp();
-    }
+     constructor() {
+         this.currentPlayers = [];
+         this.teams = [];
+         this.matches = [];
+         this.postponed = [];
+         this.currentMatchIndex = 0;
+         this.teamStats = {};
+         this.isAdminLoggedIn = false;
+
+         this.initializeApp();
+     }
 
     async initializeApp() {
         this.data = await this.loadData();
@@ -114,7 +115,9 @@ class TournamentApp {
         document.getElementById('manage-players-btn').addEventListener('click', () => this.showPlayerManagement());
         document.getElementById('start-tournament-btn').addEventListener('click', () => this.startTournament());
         document.getElementById('view-champions-btn').addEventListener('click', () => this.showChampions());
+        document.getElementById('view-sessions-btn').addEventListener('click', () => this.showSessions());
         document.getElementById('manage-seeds-btn').addEventListener('click', () => this.showSeedManagement());
+        document.getElementById('finish-season-btn').addEventListener('click', () => this.showFinishSeasonDialog());
 
         // Player management dialog
         document.getElementById('add-player-btn').addEventListener('click', () => this.addPlayer());
@@ -157,8 +160,20 @@ class TournamentApp {
         // Dialog close buttons
         document.getElementById('close-scores-btn').addEventListener('click', () => this.hideDialog('scores-dialog'));
         document.getElementById('close-champions-btn').addEventListener('click', () => this.hideDialog('champions-dialog'));
+        document.getElementById('close-sessions-btn').addEventListener('click', () => this.hideDialog('sessions-dialog'));
+        document.getElementById('close-session-view-btn').addEventListener('click', () => this.hideDialog('session-view-dialog'));
+        document.getElementById('view-session-btn').addEventListener('click', () => this.viewSession());
         document.getElementById('ok-seed-change-btn').addEventListener('click', () => this.confirmSeedChange());
         document.getElementById('cancel-seed-change-btn').addEventListener('click', () => this.hideDialog('seed-change-dialog'));
+        document.getElementById('confirm-finish-season-btn').addEventListener('click', () => this.finishSeason());
+        document.getElementById('cancel-finish-season-btn').addEventListener('click', () => this.hideDialog('finish-season-dialog'));
+
+        // Admin login and edit
+        document.getElementById('admin-login-btn').addEventListener('click', () => this.showAdminLogin());
+        document.getElementById('confirm-admin-login-btn').addEventListener('click', () => this.confirmAdminLogin());
+        document.getElementById('cancel-admin-login-btn').addEventListener('click', () => this.hideDialog('admin-login-dialog'));
+        document.getElementById('save-admin-edit-btn').addEventListener('click', () => this.saveAdminEdits());
+        document.getElementById('cancel-admin-edit-btn').addEventListener('click', () => this.hideDialog('admin-edit-dialog'));
 
         // Close dialogs when clicking outside
         document.querySelectorAll('.dialog').forEach(dialog => {
@@ -707,15 +722,15 @@ class TournamentApp {
     showChampions() {
         console.log('showChampions called');
         console.log('Championships data:', this.data.championships);
-        
+
         const championsList = document.getElementById('champions-list');
         if (!championsList) {
             console.error('champions-list element not found');
             return;
         }
-        
+
         championsList.innerHTML = '';
-        
+
         const sortedChamps = Object.entries(this.data.championships)
             .map(([player, wins]) => [player, this.data.scores[player] || 0, wins])
             .sort(([nameA, scoreA, winsA], [nameB, scoreB, winsB]) => {
@@ -738,10 +753,187 @@ class TournamentApp {
             `;
             championsList.appendChild(row);
         });
-        
+
         this.showDialog('champions-dialog');
     }
-}
+
+    // Session History
+    async showSessions() {
+        try {
+            const response = await fetch('/api/sessions');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const sessionsListbox = document.getElementById('sessions-listbox');
+            sessionsListbox.innerHTML = '';
+            data.sessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session;
+                option.textContent = session.replace('_player_', '').replace('.json', '');
+                sessionsListbox.appendChild(option);
+            });
+            this.showDialog('sessions-dialog');
+        } catch (error) {
+            console.error('Error loading sessions:', error);
+            alert('Failed to load session history.');
+        }
+    }
+
+    async viewSession() {
+        const sessionsListbox = document.getElementById('sessions-listbox');
+        const selected = sessionsListbox.selectedOptions[0];
+
+        if (!selected) {
+            alert('Please select a session to view.');
+            return;
+        }
+
+        const filename = selected.value;
+
+        try {
+            const response = await fetch(`/api/session/${filename}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const sessionData = await response.json();
+
+            // Ensure data structures exist and are objects
+            const championships = (sessionData && typeof sessionData.championships === 'object') ? sessionData.championships : {};
+            const scores = (sessionData && typeof sessionData.scores === 'object') ? sessionData.scores : {};
+
+            document.getElementById('session-view-title').textContent = `Session: ${filename.replace('_player_', '').replace('.json', '')}`;
+
+            const sessionList = document.getElementById('session-view-list');
+            sessionList.innerHTML = '';
+
+            const sortedChamps = Object.entries(championships)
+                .map(([player, wins]) => [player, (typeof scores[player] === 'number' ? scores[player] : 0), (typeof wins === 'number' ? wins : 0)])
+                .sort(([nameA, scoreA, winsA], [nameB, scoreB, winsB]) => {
+                    if (winsB !== winsA) return winsB - winsA;
+                    if (scoreB !== scoreA) return scoreB - scoreA;
+                    return nameA.localeCompare(nameB);
+                });
+
+            sortedChamps.forEach(([player, score, wins], index) => {
+                const row = document.createElement('div');
+                row.className = 'champion-row';
+                row.innerHTML = `
+                    <div class="col-rank">${index + 1}</div>
+                    <div class="col-player">${player}</div>
+                    <div class="col-wins">${wins}</div>
+                    <div class="col-scores">${score}</div>
+                `;
+                sessionList.appendChild(row);
+            });
+
+            this.hideDialog('sessions-dialog');
+            this.showDialog('session-view-dialog');
+         } catch (error) {
+             console.error('Error loading session:', error);
+             alert('Failed to load session data.');
+         }
+     }
+
+     // Finish Season
+     showFinishSeasonDialog() {
+         document.getElementById('session-name').value = '';
+         this.showDialog('finish-season-dialog');
+     }
+
+     async finishSeason() {
+         const sessionName = document.getElementById('session-name').value.trim();
+
+         if (!sessionName) {
+             alert('Please enter a session name.');
+             return;
+         }
+
+         if (!confirm('Are you sure you want to finish the season? This action cannot be undone.')) {
+             return;
+         }
+
+         try {
+             const response = await fetch('/api/finish-season', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ sessionName })
+             });
+
+             if (!response.ok) {
+                 throw new Error(`HTTP error! status: ${response.status}`);
+             }
+
+             const result = await response.json();
+             if (!result.success) {
+                 throw new Error(result.message || 'Failed to finish season');
+             }
+
+             alert('Season finished successfully! A new season has begun.');
+             this.hideDialog('finish-season-dialog');
+
+             // Reload data to reflect the new season
+             this.data = await this.loadData();
+             this.refreshPlayerList();
+
+         } catch (error) {
+             console.error('Error finishing season:', error);
+             alert('Failed to finish season. Please try again.');
+         }
+     }
+
+     // Admin Login
+     showAdminLogin() {
+         document.getElementById('admin-password').value = '';
+         this.showDialog('admin-login-dialog');
+     }
+
+     confirmAdminLogin() {
+         const password = document.getElementById('admin-password').value;
+         if (password === 'foosball') {
+             this.isAdminLoggedIn = true;
+             this.hideDialog('admin-login-dialog');
+             this.showAdminEdit();
+         } else {
+             alert('Incorrect password');
+         }
+     }
+
+     // Admin Edit
+     showAdminEdit() {
+         const list = document.getElementById('admin-edit-list');
+         list.innerHTML = '';
+         this.data.players.forEach(player => {
+             const row = document.createElement('div');
+             row.className = 'admin-edit-row';
+             row.innerHTML = `
+                 <div class="col-player">${player.name}</div>
+                 <div class="col-championships"><input type="number" class="champ-input" data-player="${player.name}" value="${this.data.championships[player.name] || 0}"></div>
+                 <div class="col-scores"><input type="number" class="score-input" data-player="${player.name}" value="${this.data.scores[player.name] || 0}"></div>
+             `;
+             list.appendChild(row);
+         });
+         this.showDialog('admin-edit-dialog');
+     }
+
+     async saveAdminEdits() {
+         const champInputs = document.querySelectorAll('.champ-input');
+         const scoreInputs = document.querySelectorAll('.score-input');
+         champInputs.forEach(input => {
+             const player = input.dataset.player;
+             this.data.championships[player] = parseInt(input.value) || 0;
+         });
+         scoreInputs.forEach(input => {
+             const player = input.dataset.player;
+             this.data.scores[player] = parseInt(input.value) || 0;
+         });
+         await this.saveData();
+         this.hideDialog('admin-edit-dialog');
+         alert('Changes saved successfully');
+     }
+ }
 
 // Initialize the app when the page loads
 document.addEventListener('DOMContentLoaded', () => {
