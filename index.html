@@ -15,37 +15,50 @@
       <!-- Main Menu Screen -->
       <div id="main-screen" class="screen active">
         <div class="card">
-          <h1 class="main-title">Foosball Tournament Manager</h1>
+          <h1 class="main-title">🥅 Foosball Tournament Manager</h1>
           <h2 class="subtitle">Select Players</h2>
 
           <div class="listbox-frame">
-            <select id="player-listbox" multiple size="11">
+            <select id="player-listbox" multiple size="7">
               <!-- Players will be populated by JavaScript -->
             </select>
           </div>
 
-          <div class="button-frame">
-            <button id="manage-players-btn" class="btn btn-add">
-              <i class="fas fa-user-plus"></i> Manage Players
-            </button>
-            <button id="view-champions-btn" class="btn btn-seed">
-              <i class="fas fa-trophy"></i> Championships
-            </button>
-            <button id="view-sessions-btn" class="btn btn-champions">
-              <i class="fas fa-history"></i> Session History
-            </button>
-            <button id="manage-seeds-btn" class="btn btn-champions ">
+          <div class="button-grid">
+            <div class="button-category">
+              <h3 class="category-title">Tournament</h3>
+              <button id="start-tournament-btn" class="btn btn-start">
+                <i class="fas fa-play"></i> Start Tournament
+              </button>
+              <button id="finish-season-btn" class="btn btn-finish">
+                <i class="fas fa-flag-checkered"></i> Finish Season
+              </button>
+            </div>
+            <div class="button-category">
+              <h3 class="category-title">Championships</h3>
+              <button id="view-champions-btn" class="btn btn-seed">
+                <i class="fas fa-trophy"></i> Championships
+              </button>
+              <button id="view-seasons-btn" class="btn btn-champions2">
+                <i class="fas fa-history"></i> Season History
+              </button>
+            </div>
+            <div class="button-category">
+              <h3 class="category-title">Player Management</h3>
+              <button id="manage-players-btn" class="btn btn-add">
+                <i class="fas fa-user-plus"></i> Manage Players
+              </button>
+              <button id="manage-seeds-btn" class="btn btn-champions">
                 <i class="fas fa-star"></i> Manage Seeds
-            </button>
-            <button id="admin-login-btn" class="btn btn-admin">
-              <i class="fas fa-lock"></i> Admin Login
-            </button>
-            <button id="finish-season-btn" class="btn btn-finish">
-              <i class="fas fa-flag-checkered"></i> Finish Season
-            </button>
-            <button id="start-tournament-btn" class="btn btn-start">
-              <i class="fas fa-play"></i> Start Tournament
-            </button>
+              </button>
+            </div>
+            <div class="button-category">
+              <h3 class="category-title">Admin</h3>
+              <button id="admin-login-btn" class="btn btn-admin">
+                <i class="fas fa-lock"></i> Admin Login
+              </button>
+
+            </div>
           </div>
 
           <p class="tip">
@@ -351,32 +364,32 @@
         </div>
       </div>
 
-      <!-- Session History Dialog -->
-      <div id="sessions-dialog" class="dialog">
+      <!-- Season History Dialog -->
+      <div id="seasons-dialog" class="dialog">
         <div class="dialog-content">
-          <h2>Session History</h2>
+          <h2>Season History</h2>
 
           <div class="listbox-frame">
-            <select id="sessions-listbox" size="10">
-              <!-- Sessions will be populated by JavaScript -->
+            <select id="seasons-listbox" size="10">
+              <!-- Seasons will be populated by JavaScript -->
             </select>
           </div>
 
           <div class="dialog-buttons">
-            <button id="view-session-btn" class="btn btn-start">
-              <i class="fas fa-eye"></i> View Session
+            <button id="view-season-btn" class="btn btn-start">
+              <i class="fas fa-eye"></i> View Season
             </button>
-            <button id="close-sessions-btn" class="btn btn-gray">
+            <button id="close-seasons-btn" class="btn btn-gray">
               <i class="fas fa-times"></i> Close
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Session View Dialog -->
-      <div id="session-view-dialog" class="dialog">
+      <!-- Season View Dialog -->
+      <div id="season-view-dialog" class="dialog">
         <div class="dialog-content">
-          <div class="champions-header" id="session-view-title">Session Results</div>
+          <div class="champions-header" id="season-view-title">Season Results</div>
 
           <div class="champions-table">
             <div class="champions-header-row">
@@ -385,13 +398,13 @@
               <div class="col-wins">Championships</div>
               <div class="col-scores">Scores</div>
             </div>
-            <div id="session-view-list" class="champions-list">
-              <!-- Session data will be populated by JavaScript -->
+            <div id="season-view-list" class="champions-list">
+              <!-- Season data will be populated by JavaScript -->
             </div>
           </div>
 
           <div class="dialog-buttons">
-            <button id="close-session-view-btn" class="btn btn-gray">
+            <button id="close-season-view-btn" class="btn btn-gray">
               <i class="fas fa-times"></i> Close
             </button>
           </div>
@@ -455,8 +468,8 @@
           <p>This will archive the current players data and start a new season with reset scores and championships.</p>
 
           <div class="entry-frame">
-            <label for="session-name">Session Name:</label>
-            <input type="text" id="session-name" placeholder="Enter session name" />
+            <label for="season-name">Season Name:</label>
+            <input type="text" id="season-name" placeholder="Enter season name" />
           </div>
 
           <div class="dialog-buttons">

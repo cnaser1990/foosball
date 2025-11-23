@@ -73,7 +73,7 @@ foosball/
 ## Benefits
 
 1. **Shared Data**: Both web and desktop applications use the same championship data
-2. **Persistent Storage**: Data survives browser sessions and application restarts
+2. **Persistent Storage**: Data survives browser seasons and application restarts
 3. **Cross-Platform**: Championship records are maintained across different application versions
 4. **Real-time Sync**: Changes made in one application are immediately available to the other
 

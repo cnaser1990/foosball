@@ -115,7 +115,7 @@ class TournamentApp {
         document.getElementById('manage-players-btn').addEventListener('click', () => this.showPlayerManagement());
         document.getElementById('start-tournament-btn').addEventListener('click', () => this.startTournament());
         document.getElementById('view-champions-btn').addEventListener('click', () => this.showChampions());
-        document.getElementById('view-sessions-btn').addEventListener('click', () => this.showSessions());
+        document.getElementById('view-seasons-btn').addEventListener('click', () => this.showSeasons());
         document.getElementById('manage-seeds-btn').addEventListener('click', () => this.showSeedManagement());
         document.getElementById('finish-season-btn').addEventListener('click', () => this.showFinishSeasonDialog());
 
@@ -160,9 +160,9 @@ class TournamentApp {
         // Dialog close buttons
         document.getElementById('close-scores-btn').addEventListener('click', () => this.hideDialog('scores-dialog'));
         document.getElementById('close-champions-btn').addEventListener('click', () => this.hideDialog('champions-dialog'));
-        document.getElementById('close-sessions-btn').addEventListener('click', () => this.hideDialog('sessions-dialog'));
-        document.getElementById('close-session-view-btn').addEventListener('click', () => this.hideDialog('session-view-dialog'));
-        document.getElementById('view-session-btn').addEventListener('click', () => this.viewSession());
+        document.getElementById('close-seasons-btn').addEventListener('click', () => this.hideDialog('seasons-dialog'));
+        document.getElementById('close-season-view-btn').addEventListener('click', () => this.hideDialog('season-view-dialog'));
+        document.getElementById('view-season-btn').addEventListener('click', () => this.viewSeason());
         document.getElementById('ok-seed-change-btn').addEventListener('click', () => this.confirmSeedChange());
         document.getElementById('cancel-seed-change-btn').addEventListener('click', () => this.hideDialog('seed-change-dialog'));
         document.getElementById('confirm-finish-season-btn').addEventListener('click', () => this.finishSeason());
@@ -757,55 +757,55 @@ class TournamentApp {
         this.showDialog('champions-dialog');
     }
 
-    // Session History
-    async showSessions() {
+    // Season History
+    async showSeasons() {
         try {
-            const response = await fetch('/api/sessions');
+            const response = await fetch('/api/seasons');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            const sessionsListbox = document.getElementById('sessions-listbox');
-            sessionsListbox.innerHTML = '';
-            data.sessions.forEach(session => {
+            const seasonsListbox = document.getElementById('seasons-listbox');
+            seasonsListbox.innerHTML = '';
+            data.seasons.forEach(season => {
                 const option = document.createElement('option');
-                option.value = session;
-                option.textContent = session.replace('_player_', '').replace('.json', '');
-                sessionsListbox.appendChild(option);
+                option.value = season;
+                option.textContent = season.replace('_player_', '').replace('.json', '');
+                seasonsListbox.appendChild(option);
             });
-            this.showDialog('sessions-dialog');
+            this.showDialog('seasons-dialog');
         } catch (error) {
-            console.error('Error loading sessions:', error);
-            alert('Failed to load session history.');
+            console.error('Error loading seasons:', error);
+            alert('Failed to load season history.');
         }
     }
 
-    async viewSession() {
-        const sessionsListbox = document.getElementById('sessions-listbox');
-        const selected = sessionsListbox.selectedOptions[0];
+    async viewSeason() {
+        const seasonsListbox = document.getElementById('seasons-listbox');
+        const selected = seasonsListbox.selectedOptions[0];
 
         if (!selected) {
-            alert('Please select a session to view.');
+            alert('Please select a season to view.');
             return;
         }
 
         const filename = selected.value;
 
         try {
-            const response = await fetch(`/api/session/${filename}`);
+            const response = await fetch(`/api/season/${filename}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const sessionData = await response.json();
+            const seasonData = await response.json();
 
             // Ensure data structures exist and are objects
-            const championships = (sessionData && typeof sessionData.championships === 'object') ? sessionData.championships : {};
-            const scores = (sessionData && typeof sessionData.scores === 'object') ? sessionData.scores : {};
+            const championships = (seasonData && typeof seasonData.championships === 'object') ? seasonData.championships : {};
+            const scores = (seasonData && typeof seasonData.scores === 'object') ? seasonData.scores : {};
 
-            document.getElementById('session-view-title').textContent = `Session: ${filename.replace('_player_', '').replace('.json', '')}`;
+            document.getElementById('season-view-title').textContent = `Season: ${filename.replace('_player_', '').replace('.json', '')}`;
 
-            const sessionList = document.getElementById('session-view-list');
-            sessionList.innerHTML = '';
+            const seasonList = document.getElementById('season-view-list');
+            seasonList.innerHTML = '';
 
             const sortedChamps = Object.entries(championships)
                 .map(([player, wins]) => [player, (typeof scores[player] === 'number' ? scores[player] : 0), (typeof wins === 'number' ? wins : 0)])
@@ -824,28 +824,28 @@ class TournamentApp {
                     <div class="col-wins">${wins}</div>
                     <div class="col-scores">${score}</div>
                 `;
-                sessionList.appendChild(row);
+                seasonList.appendChild(row);
             });
 
-            this.hideDialog('sessions-dialog');
-            this.showDialog('session-view-dialog');
+            this.hideDialog('seasons-dialog');
+            this.showDialog('season-view-dialog');
          } catch (error) {
-             console.error('Error loading session:', error);
-             alert('Failed to load session data.');
+             console.error('Error loading season:', error);
+             alert('Failed to load season data.');
          }
      }
 
      // Finish Season
      showFinishSeasonDialog() {
-         document.getElementById('session-name').value = '';
+         document.getElementById('season-name').value = '';
          this.showDialog('finish-season-dialog');
      }
 
      async finishSeason() {
-         const sessionName = document.getElementById('session-name').value.trim();
+         const seasonName = document.getElementById('season-name').value.trim();
 
-         if (!sessionName) {
-             alert('Please enter a session name.');
+         if (!seasonName) {
+             alert('Please enter a season name.');
              return;
          }
 
@@ -859,7 +859,7 @@ class TournamentApp {
                  headers: {
                      'Content-Type': 'application/json',
                  },
-                 body: JSON.stringify({ sessionName })
+                 body: JSON.stringify({ seasonName })
              });
 
              if (!response.ok) {

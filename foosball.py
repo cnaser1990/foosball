@@ -654,7 +654,7 @@ class TournamentApp:
         btns_frame = tk.Frame(card, bg="#f8f6ff")
         btns_frame.place(relx=0.5, rely=0.72, anchor="center")
         style = ttk.Style()
-        # Ensure button styles are set ONCE per session to avoid warning
+        # Ensure button styles are set ONCE per season to avoid warning
         if not hasattr(self, '_btn_styles_set'):
             style.configure("Result.TButton", font=('Arial', 13, 'bold'), background="#4CAF50", foreground="white", padding=8)
             style.map("Result.TButton", background=[('active', '#388e3c')])

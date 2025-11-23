@@ -91,40 +91,40 @@ app.post("/api/players", async (req, res) => {
    }
 });
 
-// API endpoint to list session files
-app.get("/api/sessions", async (req, res) => {
+// API endpoint to list season files
+app.get("/api/seasons", async (req, res) => {
    try {
      const files = await fs.readdir(".");
-     const sessionFiles = files.filter(file => file.startsWith("_player_") && file.endsWith(".json"));
-     res.json({ sessions: sessionFiles });
+     const seasonFiles = files.filter(file => file.startsWith("_player_") && file.endsWith(".json"));
+     res.json({ seasons: seasonFiles });
    } catch (error) {
-     console.error("Error reading session files:", error);
-     res.status(500).json({ success: false, message: "Error listing sessions" });
+     console.error("Error reading season files:", error);
+     res.status(500).json({ success: false, message: "Error listing seasons" });
    }
 });
 
-// API endpoint to load a specific session
-app.get("/api/session/:filename", async (req, res) => {
+// API endpoint to load a specific season
+app.get("/api/season/:filename", async (req, res) => {
     try {
       const filename = req.params.filename;
       if (!filename.startsWith("_player_") || !filename.endsWith(".json")) {
-        return res.status(400).json({ success: false, message: "Invalid session file" });
+        return res.status(400).json({ success: false, message: "Invalid season file" });
       }
       const data = await fs.readFile(filename, "utf8");
       res.json(JSON.parse(data));
     } catch (error) {
-      console.error("Error reading session file:", error);
-      res.status(500).json({ success: false, message: "Error loading session" });
+      console.error("Error reading season file:", error);
+      res.status(500).json({ success: false, message: "Error loading season" });
     }
   });
 
 // API endpoint to finish season
 app.post("/api/finish-season", async (req, res) => {
     try {
-      const { sessionName } = req.body;
+      const { seasonName } = req.body;
 
-      if (!sessionName || typeof sessionName !== 'string' || sessionName.trim() === '') {
-        return res.status(400).json({ success: false, message: "Invalid session name" });
+      if (!seasonName || typeof seasonName !== 'string' || seasonName.trim() === '') {
+        return res.status(400).json({ success: false, message: "Invalid season name" });
       }
 
       // Read current players.json
@@ -132,12 +132,12 @@ app.post("/api/finish-season", async (req, res) => {
       const data = JSON.parse(currentData);
 
       // Create archive filename
-      const archiveFilename = `_player_${sessionName.trim()}.json`;
+      const archiveFilename = `_player_${seasonName.trim()}.json`;
 
       // Check if archive file already exists
       try {
         await fs.access(archiveFilename);
-        return res.status(400).json({ success: false, message: "Session name already exists" });
+        return res.status(400).json({ success: false, message: "Season name already exists" });
       } catch (error) {
         // File doesn't exist, which is good
       }
