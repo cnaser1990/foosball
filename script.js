@@ -979,7 +979,17 @@ class TournamentApp {
     showAdminEdit() {
         const list = document.getElementById('admin-edit-list');
         list.innerHTML = '';
-        this.data.players.forEach(player => {
+        // Sort players like championships: by wins desc, then scores desc, then name asc
+        const sortedPlayers = this.data.players.slice().sort((a, b) => {
+            const winsA = this.data.championships[a.name] || 0;
+            const winsB = this.data.championships[b.name] || 0;
+            const scoresA = this.data.scores[a.name] || 0;
+            const scoresB = this.data.scores[b.name] || 0;
+            if (winsB !== winsA) return winsB - winsA;
+            if (scoresB !== scoresA) return scoresB - scoresA;
+            return a.name.localeCompare(b.name);
+        });
+        sortedPlayers.forEach(player => {
             const row = document.createElement('div');
             row.className = 'table-row';
             row.innerHTML = `
