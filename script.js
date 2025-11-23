@@ -1,15 +1,15 @@
 class TournamentApp {
-     constructor() {
-         this.currentPlayers = [];
-         this.teams = [];
-         this.matches = [];
-         this.postponed = [];
-         this.currentMatchIndex = 0;
-         this.teamStats = {};
-         this.isAdminLoggedIn = false;
+    constructor() {
+        this.currentPlayers = [];
+        this.teams = [];
+        this.matches = [];
+        this.postponed = [];
+        this.currentMatchIndex = 0;
+        this.teamStats = {};
+        this.isAdminLoggedIn = false;
 
-         this.initializeApp();
-     }
+        this.initializeApp();
+    }
 
     async initializeApp() {
         this.data = await this.loadData();
@@ -83,7 +83,7 @@ class TournamentApp {
             console.log('Data saved successfully to players.json');
         } catch (error) {
             console.error('Error saving data to server:', error);
-            alert('Failed to save data. Please try again.');
+            this.showNotification('Failed to save data. Please try again.', 'error');
         }
     }
 
@@ -107,6 +107,12 @@ class TournamentApp {
         document.querySelectorAll('.dialog').forEach(dialog => {
             dialog.classList.remove('active');
         });
+    }
+
+    // Notification system (optional enhancement)
+    showNotification(message, type = 'info') {
+        // You can implement a toast notification system here
+        console.log(`[${type.toUpperCase()}] ${message}`);
     }
 
     // Event Listeners
@@ -176,6 +182,16 @@ class TournamentApp {
         document.getElementById('save-admin-edit-btn').addEventListener('click', () => this.saveAdminEdits());
         document.getElementById('cancel-admin-edit-btn').addEventListener('click', () => this.hideDialog('admin-edit-dialog'));
 
+        // Admin password - Enter key
+        document.getElementById('admin-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.confirmAdminLogin();
+        });
+
+        // Season name - Enter key
+        document.getElementById('season-name').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.finishSeason();
+        });
+
         // Close dialogs when clicking outside
         document.querySelectorAll('.dialog').forEach(dialog => {
             dialog.addEventListener('click', (e) => {
@@ -209,7 +225,8 @@ class TournamentApp {
         this.data.players.forEach(player => {
             const option = document.createElement('option');
             option.value = player.name;
-            option.textContent = `${player.name} (Seed ${player.seed})`;
+            const seedLabel = player.seed === 1 ? 'Pro' : player.seed === 2 ? 'Intermediate' : 'Beginner';
+            option.textContent = `${player.name} (${seedLabel})`;
             listbox.appendChild(option);
         });
     }
@@ -223,7 +240,7 @@ class TournamentApp {
             return;
         }
 
-        if (this.data.players.some(p => p.name === name)) {
+        if (this.data.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
             alert(`Player '${name}' already exists!`);
             return;
         }
@@ -240,6 +257,8 @@ class TournamentApp {
         
         nameInput.value = '';
         document.getElementById('seed-1').checked = true;
+        
+        this.showNotification(`Player ${name} added successfully!`, 'success');
     }
 
     async removePlayer() {
@@ -251,7 +270,8 @@ class TournamentApp {
             return;
         }
 
-        if (!confirm('Are you sure you want to remove the selected player(s)?')) {
+        const playerNames = selected.map(option => option.value).join(', ');
+        if (!confirm(`Are you sure you want to remove: ${playerNames}?`)) {
             return;
         }
 
@@ -266,6 +286,8 @@ class TournamentApp {
         await this.saveData();
         this.refreshPlayerList();
         this.refreshManagePlayerList();
+        
+        this.showNotification(`${toRemove.length} player(s) removed successfully!`, 'success');
     }
 
     // Seed Management
@@ -280,7 +302,8 @@ class TournamentApp {
         this.data.players.forEach(player => {
             const option = document.createElement('option');
             option.value = player.name;
-            option.textContent = `${player.name} (Seed ${player.seed})`;
+            const seedLabel = player.seed === 1 ? 'Pro' : player.seed === 2 ? 'Intermediate' : 'Beginner';
+            option.textContent = `${player.name} - ${seedLabel}`;
             listbox.appendChild(option);
         });
     }
@@ -297,7 +320,7 @@ class TournamentApp {
         const playerName = selected.value;
         const player = this.data.players.find(p => p.name === playerName);
         
-        document.getElementById('seed-change-title').textContent = `Seed for ${playerName}`;
+        document.getElementById('seed-change-title').innerHTML = `<i class="fas fa-exchange-alt"></i> Change Seed for ${playerName}`;
         document.getElementById(`change-seed-${player.seed}`).checked = true;
         
         this.currentSeedChangePlayer = playerName;
@@ -309,9 +332,16 @@ class TournamentApp {
         const player = this.data.players.find(p => p.name === this.currentSeedChangePlayer);
         
         if (player) {
+            const oldSeed = player.seed;
             player.seed = newSeed;
             await this.saveData();
             this.refreshSeedPlayerList();
+            
+            const seedLabels = { 1: 'Pro', 2: 'Intermediate', 3: 'Beginner' };
+            this.showNotification(
+                `${player.name} changed from ${seedLabels[oldSeed]} to ${seedLabels[newSeed]}`, 
+                'success'
+            );
         }
         
         this.hideDialog('seed-change-dialog');
@@ -324,6 +354,11 @@ class TournamentApp {
         
         if (selected.length === 0) {
             alert('Please select at least one player!');
+            return;
+        }
+
+        if (selected.length < 2) {
+            alert('Please select at least 2 players to start a tournament!');
             return;
         }
 
@@ -430,10 +465,10 @@ class TournamentApp {
         });
         
         teamsListbox.innerHTML = '';
-        this.customTeams.forEach(team => {
+        this.customTeams.forEach((team, index) => {
             const option = document.createElement('option');
             option.value = team.join(' & ');
-            option.textContent = team.join(' & ');
+            option.textContent = `Team ${index + 1}: ${team.join(' & ')}`;
             teamsListbox.appendChild(option);
         });
     }
@@ -457,13 +492,18 @@ class TournamentApp {
         
         this.customTeams.push(team);
         this.refreshCustomTeamBuilder();
+        
+        this.showNotification(`Team created: ${team.join(' & ')}`, 'success');
     }
 
     removeCustomTeam() {
         const listbox = document.getElementById('teams-listbox');
         const selected = listbox.selectedOptions[0];
         
-        if (!selected) return;
+        if (!selected) {
+            alert('Please select a team to remove.');
+            return;
+        }
         
         const teamIndex = listbox.selectedIndex;
         const team = this.customTeams[teamIndex];
@@ -474,13 +514,16 @@ class TournamentApp {
         
         this.customTeams.splice(teamIndex, 1);
         this.refreshCustomTeamBuilder();
+        
+        this.showNotification('Team removed successfully', 'info');
     }
 
     async finishCustomTeams() {
         if (this.availablePlayers.length === 1) {
             this.customTeams.push([this.availablePlayers[0]]);
+            this.showNotification('Solo player added as team', 'info');
         } else if (this.availablePlayers.length > 1) {
-            alert('All players must be assigned to a team (or one solo).');
+            alert('All players must be assigned to a team (or one solo player remaining).');
             return;
         }
         
@@ -531,6 +574,10 @@ class TournamentApp {
         document.getElementById('team1-goals').value = 0;
         document.getElementById('team2-goals').value = 0;
         
+        // Initialize score displays
+        document.getElementById('team1-score-display').textContent = 0;
+        document.getElementById('team2-score-display').textContent = 0;
+        
         this.showScreen('match-screen');
     }
 
@@ -539,6 +586,17 @@ class TournamentApp {
         const currentValue = parseInt(input.value) || 0;
         const newValue = Math.max(0, currentValue + delta);
         input.value = newValue;
+        
+        // Update the score display with animation
+        const displayId = inputId.replace('-goals', '-score-display');
+        const displayElement = document.getElementById(displayId);
+        if (displayElement) {
+            displayElement.textContent = newValue;
+            displayElement.classList.add('score-change');
+            setTimeout(() => {
+                displayElement.classList.remove('score-change');
+            }, 400);
+        }
     }
 
     async submitResult() {
@@ -588,6 +646,7 @@ class TournamentApp {
     async postponeMatch() {
         this.postponed.push(this.matches[this.currentMatchIndex]);
         this.currentMatchIndex++;
+        this.showNotification('Match postponed', 'info');
         await this.showMatch();
     }
 
@@ -612,14 +671,14 @@ class TournamentApp {
         
         teamScores.forEach((teamScore, index) => {
             const row = document.createElement('div');
-            row.className = 'score-row';
+            row.className = 'table-row';
             row.innerHTML = `
-                <div class="col-rank">${index + 1}</div>
-                <div class="col-team">${teamScore.team}</div>
-                <div class="col-pts">${teamScore.points}</div>
-                <div class="col-gf">${teamScore.gf}</div>
-                <div class="col-ga">${teamScore.ga}</div>
-                <div class="col-gd">${teamScore.gd}</div>
+                <div class="table-cell rank">${index + 1}</div>
+                <div class="table-cell team">${teamScore.team}</div>
+                <div class="table-cell stat">${teamScore.points}</div>
+                <div class="table-cell stat">${teamScore.gf}</div>
+                <div class="table-cell stat">${teamScore.ga}</div>
+                <div class="table-cell stat">${teamScore.gd}</div>
             `;
             scoresList.appendChild(row);
         });
@@ -656,7 +715,7 @@ class TournamentApp {
             if (best.length === 1) {
                 await this.declareChampion(best[0].index);
             } else {
-                alert('Same Teams With Same Point And Same Goals!');
+                alert('Multiple teams tied with same points and goal difference!');
                 this.showScreen('main-screen');
             }
         }
@@ -681,6 +740,10 @@ class TournamentApp {
         document.getElementById('tie-team1-goals').value = 0;
         document.getElementById('tie-team2-goals').value = 0;
         
+        // Initialize score displays
+        document.getElementById('tie-team1-score-display').textContent = 0;
+        document.getElementById('tie-team2-score-display').textContent = 0;
+        
         this.tiebreakerTeams = [t1, t2];
         this.showScreen('tiebreaker-screen');
     }
@@ -690,12 +753,12 @@ class TournamentApp {
         const g2 = parseInt(document.getElementById('tie-team2-goals').value) || 0;
         
         if (g1 < 0 || g2 < 0) {
-            alert('Wrong number!');
+            alert('Goals cannot be negative!');
             return;
         }
         
         if (g1 === g2) {
-            alert('Finals must have a winner!');
+            alert('Finals must have a winner! No draws allowed.');
             return;
         }
         
@@ -715,15 +778,17 @@ class TournamentApp {
         });
         
         await this.saveData();
-        alert(`Champions: ${winner.join(' & ')}!`);
+        
+        // Show celebration alert
+        const winnerNames = winner.join(' & ');
+        alert(`🏆 CHAMPIONS: ${winnerNames}! 🏆`);
+        
         this.showScreen('main-screen');
+        this.showNotification(`${winnerNames} won the tournament!`, 'success');
     }
 
     // Champions Display
     showChampions() {
-        console.log('showChampions called');
-        console.log('Championships data:', this.data.championships);
-
         const championsList = document.getElementById('champions-list');
         if (!championsList) {
             console.error('champions-list element not found');
@@ -735,22 +800,19 @@ class TournamentApp {
         const sortedChamps = Object.entries(this.data.championships)
             .map(([player, wins]) => [player, this.data.scores[player] || 0, wins])
             .sort(([nameA, scoreA, winsA], [nameB, scoreB, winsB]) => {
-                // Sort by wins descending, then by score descending, then by name ascending
                 if (winsB !== winsA) return winsB - winsA;
                 if (scoreB !== scoreA) return scoreB - scoreA;
                 return nameA.localeCompare(nameB);
             });
 
-        console.log('Sorted champions:', sortedChamps);
-
         sortedChamps.forEach(([player, score, wins], index) => {
             const row = document.createElement('div');
-            row.className = 'champion-row';
+            row.className = 'table-row';
             row.innerHTML = `
-                <div class="col-rank">${index + 1}</div>
-                <div class="col-player">${player}</div>
-                <div class="col-wins">${wins}</div>
-                <div class="col-scores">${score}</div>
+                <div class="table-cell rank">${index + 1}</div>
+                <div class="table-cell player">${player}</div>
+                <div class="table-cell stat">${wins}</div>
+                <div class="table-cell stat">${score}</div>
             `;
             championsList.appendChild(row);
         });
@@ -768,12 +830,20 @@ class TournamentApp {
             const data = await response.json();
             const seasonsListbox = document.getElementById('seasons-listbox');
             seasonsListbox.innerHTML = '';
-            data.seasons.forEach(season => {
+            
+            if (data.seasons.length === 0) {
                 const option = document.createElement('option');
-                option.value = season;
-                option.textContent = season.replace('_player_', '').replace('.json', '');
+                option.textContent = 'No archived seasons yet';
+                option.disabled = true;
                 seasonsListbox.appendChild(option);
-            });
+            } else {
+                data.seasons.forEach(season => {
+                    const option = document.createElement('option');
+                    option.value = season;
+                    option.textContent = season.replace('_player_', '').replace('.json', '');
+                    seasonsListbox.appendChild(option);
+                });
+            }
             this.showDialog('seasons-dialog');
         } catch (error) {
             console.error('Error loading seasons:', error);
@@ -799,11 +869,11 @@ class TournamentApp {
             }
             const seasonData = await response.json();
 
-            // Ensure data structures exist and are objects
             const championships = (seasonData && typeof seasonData.championships === 'object') ? seasonData.championships : {};
             const scores = (seasonData && typeof seasonData.scores === 'object') ? seasonData.scores : {};
 
-            document.getElementById('season-view-title').textContent = `Season: ${filename.replace('_player_', '').replace('.json', '')}`;
+            document.getElementById('season-view-title').innerHTML = 
+                `<i class="fas fa-calendar-alt"></i> Season: ${filename.replace('_player_', '').replace('.json', '')}`;
 
             const seasonList = document.getElementById('season-view-list');
             seasonList.innerHTML = '';
@@ -818,123 +888,134 @@ class TournamentApp {
 
             sortedChamps.forEach(([player, score, wins], index) => {
                 const row = document.createElement('div');
-                row.className = 'champion-row';
+                row.className = 'table-row';
                 row.innerHTML = `
-                    <div class="col-rank">${index + 1}</div>
-                    <div class="col-player">${player}</div>
-                    <div class="col-wins">${wins}</div>
-                    <div class="col-scores">${score}</div>
+                    <div class="table-cell rank">${index + 1}</div>
+                    <div class="table-cell player">${player}</div>
+                    <div class="table-cell stat">${wins}</div>
+                    <div class="table-cell stat">${score}</div>
                 `;
                 seasonList.appendChild(row);
             });
 
             this.hideDialog('seasons-dialog');
             this.showDialog('season-view-dialog');
-         } catch (error) {
-             console.error('Error loading season:', error);
-             alert('Failed to load season data.');
-         }
-     }
+        } catch (error) {
+            console.error('Error loading season:', error);
+            alert('Failed to load season data.');
+        }
+    }
 
-     // Finish Season
-     showFinishSeasonDialog() {
-         document.getElementById('season-name').value = '';
-         this.showDialog('finish-season-dialog');
-     }
+    // Finish Season
+    showFinishSeasonDialog() {
+        document.getElementById('season-name').value = '';
+        this.showDialog('finish-season-dialog');
+    }
 
-     async finishSeason() {
-         const seasonName = document.getElementById('season-name').value.trim();
+    async finishSeason() {
+        const seasonName = document.getElementById('season-name').value.trim();
 
-         if (!seasonName) {
-             alert('Please enter a season name.');
-             return;
-         }
+        if (!seasonName) {
+            alert('Please enter a season name.');
+            return;
+        }
 
-         if (!confirm('Are you sure you want to finish the season? This action cannot be undone.')) {
-             return;
-         }
+        if (!confirm('Are you sure you want to finish the season? This will archive current data and reset championships.')) {
+            return;
+        }
 
-         try {
-             const response = await fetch('/api/finish-season', {
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify({ seasonName })
-             });
+        try {
+            const response = await fetch('/api/finish-season', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ seasonName })
+            });
 
-             if (!response.ok) {
-                 throw new Error(`HTTP error! status: ${response.status}`);
-             }
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-             const result = await response.json();
-             if (!result.success) {
-                 throw new Error(result.message || 'Failed to finish season');
-             }
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.message || 'Failed to finish season');
+            }
 
-             alert('Season finished successfully! A new season has begun.');
-             this.hideDialog('finish-season-dialog');
+            alert('✅ Season finished successfully! A new season has begun.');
+            this.hideDialog('finish-season-dialog');
 
-             // Reload data to reflect the new season
-             this.data = await this.loadData();
-             this.refreshPlayerList();
+            // Reload data to reflect the new season
+            this.data = await this.loadData();
+            this.refreshPlayerList();
+            this.showNotification('New season started!', 'success');
 
-         } catch (error) {
-             console.error('Error finishing season:', error);
-             alert('Failed to finish season. Please try again.');
-         }
-     }
+        } catch (error) {
+            console.error('Error finishing season:', error);
+            alert('Failed to finish season. Please try again.');
+        }
+    }
 
-     // Admin Login
-     showAdminLogin() {
-         document.getElementById('admin-password').value = '';
-         this.showDialog('admin-login-dialog');
-     }
+    // Admin Login
+    showAdminLogin() {
+        document.getElementById('admin-password').value = '';
+        this.showDialog('admin-login-dialog');
+    }
 
-     confirmAdminLogin() {
-         const password = document.getElementById('admin-password').value;
-         if (password === 'foosball') {
-             this.isAdminLoggedIn = true;
-             this.hideDialog('admin-login-dialog');
-             this.showAdminEdit();
-         } else {
-             alert('Incorrect password');
-         }
-     }
+    confirmAdminLogin() {
+        const password = document.getElementById('admin-password').value;
+        if (password === 'foosball') {
+            this.isAdminLoggedIn = true;
+            this.hideDialog('admin-login-dialog');
+            this.showAdminEdit();
+            this.showNotification('Admin access granted', 'success');
+        } else {
+            alert('❌ Incorrect password');
+            document.getElementById('admin-password').value = '';
+        }
+    }
 
-     // Admin Edit
-     showAdminEdit() {
-         const list = document.getElementById('admin-edit-list');
-         list.innerHTML = '';
-         this.data.players.forEach(player => {
-             const row = document.createElement('div');
-             row.className = 'admin-edit-row';
-             row.innerHTML = `
-                 <div class="col-player">${player.name}</div>
-                 <div class="col-championships"><input type="number" class="champ-input" data-player="${player.name}" value="${this.data.championships[player.name] || 0}"></div>
-                 <div class="col-scores"><input type="number" class="score-input" data-player="${player.name}" value="${this.data.scores[player.name] || 0}"></div>
-             `;
-             list.appendChild(row);
-         });
-         this.showDialog('admin-edit-dialog');
-     }
+    // Admin Edit
+    showAdminEdit() {
+        const list = document.getElementById('admin-edit-list');
+        list.innerHTML = '';
+        this.data.players.forEach(player => {
+            const row = document.createElement('div');
+            row.className = 'table-row';
+            row.innerHTML = `
+                <div class="table-cell player">${player.name}</div>
+                <div class="table-cell stat editable">
+                    <input type="number" class="champ-input" data-player="${player.name}" value="${this.data.championships[player.name] || 0}" min="0">
+                </div>
+                <div class="table-cell stat editable">
+                    <input type="number" class="score-input" data-player="${player.name}" value="${this.data.scores[player.name] || 0}">
+                </div>
+            `;
+            list.appendChild(row);
+        });
+        this.showDialog('admin-edit-dialog');
+    }
 
-     async saveAdminEdits() {
-         const champInputs = document.querySelectorAll('.champ-input');
-         const scoreInputs = document.querySelectorAll('.score-input');
-         champInputs.forEach(input => {
-             const player = input.dataset.player;
-             this.data.championships[player] = parseInt(input.value) || 0;
-         });
-         scoreInputs.forEach(input => {
-             const player = input.dataset.player;
-             this.data.scores[player] = parseInt(input.value) || 0;
-         });
-         await this.saveData();
-         this.hideDialog('admin-edit-dialog');
-         alert('Changes saved successfully');
-     }
- }
+    async saveAdminEdits() {
+        const champInputs = document.querySelectorAll('.champ-input');
+        const scoreInputs = document.querySelectorAll('.score-input');
+        
+        champInputs.forEach(input => {
+            const player = input.dataset.player;
+            this.data.championships[player] = parseInt(input.value) || 0;
+        });
+        
+        scoreInputs.forEach(input => {
+            const player = input.dataset.player;
+            this.data.scores[player] = parseInt(input.value) || 0;
+        });
+        
+        await this.saveData();
+        this.hideDialog('admin-edit-dialog');
+        alert('✅ Changes saved successfully!');
+        this.showNotification('Admin changes saved', 'success');
+    }
+}
 
 // Initialize the app when the page loads
 document.addEventListener('DOMContentLoaded', () => {

@@ -14,94 +14,190 @@
     <div id="app">
       <!-- Main Menu Screen -->
       <div id="main-screen" class="screen active">
-        <div class="card">
-          <h1 class="main-title">🥅 Foosball Tournament Manager</h1>
-          <h2 class="subtitle">Select Players</h2>
-
-          <div class="listbox-frame">
-            <select id="player-listbox" multiple size="7">
-              <!-- Players will be populated by JavaScript -->
-            </select>
+        <div class="main-menu-container">
+          <!-- Hero Section -->
+          <div class="hero-header">
+            <div class="hero-icon-wrapper">
+              <div class="hero-icon">
+                <i class="fas fa-futbol"></i>
+              </div>
+              <div class="hero-glow"></div>
+            </div>
+            <h1 class="hero-title">Foosball Tournament</h1>
+            <p class="hero-subtitle">Professional Tournament Management System</p>
           </div>
 
-          <div class="button-grid">
-            <div class="button-category">
-              <h3 class="category-title">Tournament</h3>
-              <button id="start-tournament-btn" class="btn btn-start">
-                <i class="fas fa-play"></i> Start Tournament
-              </button>
-              <button id="finish-season-btn" class="btn btn-finish">
-                <i class="fas fa-flag-checkered"></i> Finish Season
-              </button>
+          <!-- Player Selection -->
+          <div class="player-selection-card">
+            <div class="card-header">
+              <i class="fas fa-users"></i>
+              <h2>Select Players</h2>
             </div>
-            <div class="button-category">
-              <h3 class="category-title">Championships</h3>
-              <button id="view-champions-btn" class="btn btn-seed">
-                <i class="fas fa-trophy"></i> Championships
-              </button>
-              <button id="view-seasons-btn" class="btn btn-champions2">
-                <i class="fas fa-history"></i> Season History
-              </button>
+            <div class="player-listbox-wrapper">
+              <select id="player-listbox" multiple size="8">
+                <!-- Players populated by JavaScript -->
+              </select>
             </div>
-            <div class="button-category">
-              <h3 class="category-title">Player Management</h3>
-              <button id="manage-players-btn" class="btn btn-add">
-                <i class="fas fa-user-plus"></i> Manage Players
-              </button>
-              <button id="manage-seeds-btn" class="btn btn-champions">
-                <i class="fas fa-star"></i> Manage Seeds
-              </button>
-            </div>
-            <div class="button-category">
-              <h3 class="category-title">Admin</h3>
-              <button id="admin-login-btn" class="btn btn-admin">
-                <i class="fas fa-lock"></i> Admin Login
-              </button>
-
+            <div class="selection-hint">
+              <i class="fas fa-info-circle"></i>
+              <span>Hold Ctrl (Cmd on Mac) to select multiple players</span>
             </div>
           </div>
 
-          <p class="tip">
-            Tip: Hold Ctrl (Cmd on Mac) to select multiple players
-          </p>
+          <!-- Action Grid -->
+          <div class="action-grid">
+            <!-- Tournament Section -->
+            <div class="action-card tournament-card">
+              <div class="action-card-header">
+                <i class="fas fa-trophy"></i>
+                <h3>Tournament</h3>
+              </div>
+              <div class="action-card-body">
+                <button id="start-tournament-btn" class="action-btn success-btn">
+                  <i class="fas fa-play-circle"></i>
+                  <span>Start Tournament</span>
+                </button>
+                <button id="finish-season-btn" class="action-btn danger-btn">
+                  <i class="fas fa-flag-checkered"></i>
+                  <span>Finish Season</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Statistics Section -->
+            <div class="action-card stats-card">
+              <div class="action-card-header">
+                <i class="fas fa-chart-line"></i>
+                <h3>Statistics</h3>
+              </div>
+              <div class="action-card-body">
+                <button id="view-champions-btn" class="action-btn info-btn">
+                  <i class="fas fa-crown"></i>
+                  <span>Championships</span>
+                </button>
+                <button id="view-seasons-btn" class="action-btn warning-btn">
+                  <i class="fas fa-history"></i>
+                  <span>Season History</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Management Section -->
+            <div class="action-card management-card">
+              <div class="action-card-header">
+                <i class="fas fa-cog"></i>
+                <h3>Management</h3>
+              </div>
+              <div class="action-card-body">
+                <button id="manage-players-btn" class="action-btn primary-btn">
+                  <i class="fas fa-user-plus"></i>
+                  <span>Manage Players</span>
+                </button>
+                <button id="manage-seeds-btn" class="action-btn secondary-btn">
+                  <i class="fas fa-star"></i>
+                  <span>Manage Seeds</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Admin Section -->
+            <div class="action-card admin-card">
+              <div class="action-card-header">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Admin</h3>
+              </div>
+              <div class="action-card-body">
+                <button id="admin-login-btn" class="action-btn admin-btn">
+                  <i class="fas fa-lock"></i>
+                  <span>Admin Panel</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="main-footer">
+            <p>⚽ Built for Champions</p>
+          </div>
         </div>
       </div>
 
       <!-- Player Management Dialog -->
       <div id="player-management-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>Add / Remove Players</h2>
-
-          <div class="listbox-frame">
-            <select id="manage-player-listbox" multiple size="7">
-              <!-- Players will be populated by JavaScript -->
-            </select>
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-users-cog"></i>
+              Player Management
+            </h2>
+            <button class="close-dialog-btn" id="close-player-dialog-btn">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
-          <div class="entry-frame">
-            <label for="new-player-name">New Player Name:</label>
-            <input type="text" id="new-player-name" placeholder="Enter name" />
+          <div class="dialog-body">
+            <div class="section-block">
+              <label class="section-label">
+                <i class="fas fa-list"></i>
+                Current Players
+              </label>
+              <div class="custom-listbox">
+                <select id="manage-player-listbox" multiple size="7">
+                  <!-- Players populated by JavaScript -->
+                </select>
+              </div>
+            </div>
 
-            <label>Seed:</label>
-            <div class="seed-options">
-              <input type="radio" id="seed-1" name="seed" value="1" checked />
-              <label for="seed-1" class="seed-btn seed-1">1</label>
-              <input type="radio" id="seed-2" name="seed" value="2" />
-              <label for="seed-2" class="seed-btn seed-2">2</label>
-              <input type="radio" id="seed-3" name="seed" value="3" />
-              <label for="seed-3" class="seed-btn seed-3">3</label>
+            <div class="section-block">
+              <label class="section-label">
+                <i class="fas fa-user-plus"></i>
+                Add New Player
+              </label>
+              <div class="input-group">
+                <div class="input-wrapper">
+                  <input 
+                    type="text" 
+                    id="new-player-name" 
+                    placeholder="Enter player name"
+                    class="modern-input"
+                  />
+                  <i class="fas fa-user input-icon"></i>
+                </div>
+              </div>
+
+              <div class="seed-selector">
+                <label class="seed-label">Select Skill Level:</label>
+                <div class="seed-options-modern">
+                  <input type="radio" id="seed-1" name="seed" value="1" checked />
+                  <label for="seed-1" class="seed-chip seed-1">
+                    <i class="fas fa-fire"></i>
+                    <span>Pro</span>
+                  </label>
+                  
+                  <input type="radio" id="seed-2" name="seed" value="2" />
+                  <label for="seed-2" class="seed-chip seed-2">
+                    <i class="fas fa-star"></i>
+                    <span>Intermediate</span>
+                  </label>
+                  
+                  <input type="radio" id="seed-3" name="seed" value="3" />
+                  <label for="seed-3" class="seed-chip seed-3">
+                    <i class="fas fa-seedling"></i>
+                    <span>Beginner</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="dialog-buttons">
-            <button id="remove-player-btn" class="btn btn-red">
-              <i class="fas fa-user-minus"></i> Remove Player(s)
+          <div class="dialog-footer">
+            <button id="remove-player-btn" class="modern-btn danger-outline-btn">
+              <i class="fas fa-trash-alt"></i>
+              <span>Remove Selected</span>
             </button>
-            <button id="add-player-btn" class="btn btn-green">
-              <i class="fas fa-user-plus"></i> Add Player
-            </button>
-            <button id="close-player-dialog-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
+            <button id="add-player-btn" class="modern-btn success-solid-btn">
+              <i class="fas fa-plus-circle"></i>
+              <span>Add Player</span>
             </button>
           </div>
         </div>
@@ -109,306 +205,40 @@
 
       <!-- Seed Management Dialog -->
       <div id="seed-management-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>Players and Seeds</h2>
-
-          <div class="listbox-frame">
-            <select id="seed-player-listbox" size="10">
-              <!-- Players will be populated by JavaScript -->
-            </select>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="change-seed-btn" class="btn btn-seed">
-              <i class="fas fa-star"></i> Change Seed
-            </button>
-            <button id="close-seed-dialog-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-star"></i>
+              Seed Management
+            </h2>
+            <button class="close-dialog-btn" id="close-seed-dialog-btn">
+              <i class="fas fa-times"></i>
             </button>
           </div>
 
-          <p class="tip">Tip: 1 = stronger, 2 = strong, 3 = beginner</p>
-        </div>
-      </div>
-
-      <!-- Team Mode Selection Dialog -->
-      <div id="team-mode-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>How would you like to form teams?</h2>
-
-          <div class="team-mode-options">
-            <input
-              type="radio"
-              id="random-teams"
-              name="team-mode"
-              value="random"
-              checked
-            />
-            <label for="random-teams" class="team-mode-btn"
-              ><i class="fas fa-random"></i> Random Teams</label
-            >
-
-            <input
-              type="radio"
-              id="seeded-teams"
-              name="team-mode"
-              value="seed"
-            />
-            <label for="seeded-teams" class="team-mode-btn"
-              ><i class="fas fa-star"></i> Seeded Teams</label
-            >
-
-            <input
-              type="radio"
-              id="custom-teams"
-              name="team-mode"
-              value="custom"
-            />
-            <label for="custom-teams" class="team-mode-btn"
-              ><i class="fas fa-users"></i> Custom Teams</label
-            >
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="cancel-team-mode-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="continue-team-mode-btn" class="btn btn-start">
-              <i class="fas fa-arrow-right"></i> Continue
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Custom Team Builder Dialog -->
-      <div id="custom-team-dialog" class="dialog">
-        <div class="dialog-content large">
-          <h2>Build Teams (2 Players per Team)</h2>
-
-          <div class="team-builder">
-            <div class="available-players">
-              <h3>Available Players</h3>
-              <select id="available-players-listbox" multiple size="18">
-                <!-- Players will be populated by JavaScript -->
-              </select>
-            </div>
-
-            <div class="teams-list">
-              <h3>Teams</h3>
-              <select id="teams-listbox" size="18">
-                <!-- Teams will be populated by JavaScript -->
-              </select>
-            </div>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="add-team-btn" class="btn btn-start">
-              <i class="fas fa-plus"></i> Add Team
-            </button>
-            <button id="remove-team-btn" class="btn btn-gray">
-              <i class="fas fa-minus"></i> Remove Team
-            </button>
-            <button id="cancel-custom-team-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="done-custom-team-btn" class="btn btn-start">
-              <i class="fas fa-check"></i> Done
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Match Screen -->
-      <div id="match-screen" class="screen">
-        <div class="match-card">
-          <div id="match-badge" class="match-badge">Match 1/6</div>
-          <button id="back-to-menu-btn" class="btn btn-red back-to-menu">
-            <i class="fas fa-home"></i> Back to Menu
-          </button>
-
-          <div class="vs-frame">
-            <div id="team1-label" class="team-label team1">Team 1</div>
-            <div class="vs-label">VS</div>
-            <div id="team2-label" class="team-label team2">Team 2</div>
-          </div>
-
-          <div class="score-frame">
-            <div class="score-box">
-              <label>Goals Team 1</label>
-              <div class="score-input">
-                <button class="score-btn" id="team1-minus">−</button>
-                <input type="number" id="team1-goals" value="0" min="0" />
-                <button class="score-btn" id="team1-plus">+</button>
+          <div class="dialog-body">
+            <div class="section-block">
+              <label class="section-label">
+                <i class="fas fa-users"></i>
+                Players & Seeds
+              </label>
+              <div class="custom-listbox">
+                <select id="seed-player-listbox" size="10">
+                  <!-- Players populated by JavaScript -->
+                </select>
               </div>
             </div>
 
-            <div class="score-box">
-              <label>Goals Team 2</label>
-              <div class="score-input">
-                <button class="score-btn" id="team2-minus">−</button>
-                <input type="number" id="team2-goals" value="0" min="0" />
-                <button class="score-btn" id="team2-plus">+</button>
-              </div>
+            <div class="info-box">
+              <i class="fas fa-lightbulb"></i>
+              <p><strong>Pro:</strong> Highly skilled players | <strong>Intermediate:</strong> Moderate skill | <strong>Beginner:</strong> Learning players</p>
             </div>
           </div>
 
-          <div class="match-buttons">
-            <button id="submit-result-btn" class="btn btn-result">
-              <i class="fas fa-check"></i> Submit Result
-            </button>
-            <button id="postpone-match-btn" class="btn btn-postpone">
-              <i class="fas fa-pause"></i> Postpone
-            </button>
-          </div>
-
-          <button id="view-scores-btn" class="btn btn-scores">
-            <i class="fas fa-chart-bar"></i> View Scores
-          </button>
-
-          <p class="match-tip">
-            Tip: Use + / − or type to adjust goals, then press ✔
-          </p>
-        </div>
-      </div>
-
-      <!-- Tiebreaker Screen -->
-      <div id="tiebreaker-screen" class="screen">
-        <div class="match-card">
-          <div class="match-badge tiebreaker">⚡ Final Tiebreaker!</div>
-
-          <div class="vs-frame">
-            <div id="tie-team1-label" class="team-label team1">Team 1</div>
-            <div class="vs-label tie">VS</div>
-            <div id="tie-team2-label" class="team-label team2">Team 2</div>
-          </div>
-
-          <div class="score-frame">
-            <div class="score-box">
-              <label>Goals Team 1</label>
-              <div class="score-input">
-                <button class="score-btn" id="tie-team1-minus">−</button>
-                <input type="number" id="tie-team1-goals" value="0" min="0" />
-                <button class="score-btn" id="tie-team1-plus">+</button>
-              </div>
-            </div>
-
-            <div class="score-box">
-              <label>Goals Team 2</label>
-              <div class="score-input">
-                <button class="score-btn" id="tie-team2-minus">−</button>
-                <input type="number" id="tie-team2-goals" value="0" min="0" />
-                <button class="score-btn" id="tie-team2-plus">+</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="match-buttons">
-            <button id="declare-winner-btn" class="btn btn-result">
-              <i class="fas fa-trophy"></i> Declare Winner
-            </button>
-          </div>
-
-          <p class="match-tip tiebreaker">
-            Tip: Use + / − or type to adjust goals. Draws are not allowed in the
-            final.
-          </p>
-        </div>
-      </div>
-
-      <!-- Scores Dialog -->
-      <div id="scores-dialog" class="dialog">
-        <div class="dialog-content large">
-          <div class="scores-header">Team Scores</div>
-
-          <div class="scores-table">
-            <div class="scores-header-row">
-              <div class="col-rank">Rk</div>
-              <div class="col-team">Team</div>
-              <div class="col-pts">Pts</div>
-              <div class="col-gf">GF</div>
-              <div class="col-ga">GA</div>
-              <div class="col-gd">GD</div>
-            </div>
-            <div id="scores-list" class="scores-list">
-              <!-- Scores will be populated by JavaScript -->
-            </div>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="close-scores-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Champions Dialog -->
-      <div id="champions-dialog" class="dialog">
-        <div class="dialog-content">
-          <div class="champions-header">Championship Leaderboard</div>
-
-          <div class="champions-table">
-            <div class="champions-header-row">
-              <div class="col-rank">Rank</div>
-              <div class="col-player">Player</div>
-              <div class="col-wins">Championships</div>
-              <div class="col-scores">Scores</div>
-            </div>
-            <div id="champions-list" class="champions-list">
-              <!-- Champions will be populated by JavaScript -->
-            </div>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="close-champions-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Season History Dialog -->
-      <div id="seasons-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>Season History</h2>
-
-          <div class="listbox-frame">
-            <select id="seasons-listbox" size="10">
-              <!-- Seasons will be populated by JavaScript -->
-            </select>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="view-season-btn" class="btn btn-start">
-              <i class="fas fa-eye"></i> View Season
-            </button>
-            <button id="close-seasons-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Season View Dialog -->
-      <div id="season-view-dialog" class="dialog">
-        <div class="dialog-content">
-          <div class="champions-header" id="season-view-title">Season Results</div>
-
-          <div class="champions-table">
-            <div class="champions-header-row">
-              <div class="col-rank">Rank</div>
-              <div class="col-player">Player</div>
-              <div class="col-wins">Championships</div>
-              <div class="col-scores">Scores</div>
-            </div>
-            <div id="season-view-list" class="champions-list">
-              <!-- Season data will be populated by JavaScript -->
-            </div>
-          </div>
-
-          <div class="dialog-buttons">
-            <button id="close-season-view-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Close
+          <div class="dialog-footer">
+            <button id="change-seed-btn" class="modern-btn primary-solid-btn">
+              <i class="fas fa-edit"></i>
+              <span>Change Seed</span>
             </button>
           </div>
         </div>
@@ -416,71 +246,571 @@
 
       <!-- Seed Change Dialog -->
       <div id="seed-change-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2 id="seed-change-title">Seed for Player</h2>
-
-          <div class="seed-change-options">
-            <input
-              type="radio"
-              id="change-seed-1"
-              name="change-seed"
-              value="1"
-            />
-            <label for="change-seed-1" class="seed-change-btn seed-1"
-              ><i class="fas fa-star"></i> 1 (Stronger)</label
-            >
-
-            <input
-              type="radio"
-              id="change-seed-2"
-              name="change-seed"
-              value="2"
-            />
-            <label for="change-seed-2" class="seed-change-btn seed-2"
-              ><i class="fas fa-star-half-alt"></i> 2 (Strong)</label
-            >
-
-            <input
-              type="radio"
-              id="change-seed-3"
-              name="change-seed"
-              value="3"
-            />
-            <label for="change-seed-3" class="seed-change-btn seed-3"
-              ><i class="far fa-star"></i> 3 (Beginner)</label
-            >
+        <div class="dialog-content modern-dialog small-dialog">
+          <div class="dialog-header">
+            <h2 id="seed-change-title">
+              <i class="fas fa-exchange-alt"></i>
+              Change Seed
+            </h2>
+            <button class="close-dialog-btn" id="cancel-seed-change-btn">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
-          <div class="dialog-buttons">
-            <button id="cancel-seed-change-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
+          <div class="dialog-body">
+            <div class="seed-change-grid">
+              <input type="radio" id="change-seed-1" name="change-seed" value="1" />
+              <label for="change-seed-1" class="seed-option-card seed-1">
+                <i class="fas fa-fire"></i>
+                <span class="seed-title">Pro</span>
+                <span class="seed-desc">Highly Skilled</span>
+              </label>
+
+              <input type="radio" id="change-seed-2" name="change-seed" value="2" />
+              <label for="change-seed-2" class="seed-option-card seed-2">
+                <i class="fas fa-star"></i>
+                <span class="seed-title">Intermediate</span>
+                <span class="seed-desc">Moderate Skill</span>
+              </label>
+
+              <input type="radio" id="change-seed-3" name="change-seed" value="3" />
+              <label for="change-seed-3" class="seed-option-card seed-3">
+                <i class="fas fa-seedling"></i>
+                <span class="seed-title">Beginner</span>
+                <span class="seed-desc">Learning</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="ok-seed-change-btn" class="modern-btn primary-solid-btn">
+              <i class="fas fa-check"></i>
+              <span>Confirm</span>
             </button>
-            <button id="ok-seed-change-btn" class="btn btn-start">
-              <i class="fas fa-check"></i> OK
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Mode Selection Dialog -->
+      <div id="team-mode-dialog" class="dialog">
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-users"></i>
+              Team Formation
+            </h2>
+          </div>
+
+          <div class="dialog-body">
+            <p class="dialog-description">How would you like to form teams?</p>
+            
+            <div class="team-mode-grid">
+              <input type="radio" id="random-teams" name="team-mode" value="random" checked />
+              <label for="random-teams" class="team-mode-card">
+                <i class="fas fa-random"></i>
+                <span class="mode-title">Random Teams</span>
+                <span class="mode-desc">Players randomly paired</span>
+              </label>
+
+              <input type="radio" id="seeded-teams" name="team-mode" value="seed" />
+              <label for="seeded-teams" class="team-mode-card">
+                <i class="fas fa-balance-scale"></i>
+                <span class="mode-title">Seeded Teams</span>
+                <span class="mode-desc">Balanced by skill level</span>
+              </label>
+
+              <input type="radio" id="custom-teams" name="team-mode" value="custom" />
+              <label for="custom-teams" class="team-mode-card">
+                <i class="fas fa-hands-helping"></i>
+                <span class="mode-title">Custom Teams</span>
+                <span class="mode-desc">Manually create teams</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="cancel-team-mode-btn" class="modern-btn secondary-outline-btn">
+              <i class="fas fa-times"></i>
+              <span>Cancel</span>
             </button>
+            <button id="continue-team-mode-btn" class="modern-btn success-solid-btn">
+              <i class="fas fa-arrow-right"></i>
+              <span>Continue</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Team Builder Dialog -->
+      <div id="custom-team-dialog" class="dialog">
+        <div class="dialog-content modern-dialog large-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-users-cog"></i>
+              Build Custom Teams
+            </h2>
+            <button class="close-dialog-btn" id="cancel-custom-team-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="dialog-body">
+            <div class="team-builder-grid">
+              <div class="builder-column">
+                <div class="column-header">
+                  <i class="fas fa-user-friends"></i>
+                  <h3>Available Players</h3>
+                </div>
+                <div class="custom-listbox">
+                  <select id="available-players-listbox" multiple size="15">
+                    <!-- Players populated by JavaScript -->
+                  </select>
+                </div>
+              </div>
+
+              <div class="builder-controls">
+                <button id="add-team-btn" class="builder-btn">
+                  <i class="fas fa-arrow-right"></i>
+                  <span>Create Team</span>
+                </button>
+                <div class="builder-divider"></div>
+                <button id="remove-team-btn" class="builder-btn danger">
+                  <i class="fas fa-arrow-left"></i>
+                  <span>Remove Team</span>
+                </button>
+              </div>
+
+              <div class="builder-column">
+                <div class="column-header">
+                  <i class="fas fa-users"></i>
+                  <h3>Formed Teams</h3>
+                </div>
+                <div class="custom-listbox">
+                  <select id="teams-listbox" size="15">
+                    <!-- Teams populated by JavaScript -->
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <i class="fas fa-info-circle"></i>
+              <p>Select exactly 2 players from the left, then click "Create Team". You can leave one player solo if needed.</p>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="done-custom-team-btn" class="modern-btn success-solid-btn large">
+              <i class="fas fa-check-circle"></i>
+              <span>Done - Start Tournament</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Match Screen -->
+      <div id="match-screen" class="screen">
+        <div class="match-container">
+          <!-- Header Section -->
+          <div class="match-header">
+            <button id="back-to-menu-btn" class="btn-icon btn-back">
+              <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="match-info">
+              <div id="match-badge" class="match-number">Match 1/6</div>
+              <div class="match-tournament-title">🏆 Round Robin Tournament</div>
+            </div>
+            <button id="view-scores-btn" class="btn-icon btn-standings">
+              <i class="fas fa-chart-bar"></i>
+            </button>
+          </div>
+
+          <!-- Main Match Content -->
+          <div class="match-content">
+            <!-- Team 1 Section -->
+            <div class="team-section team-left">
+              <div class="team-card">
+                <div class="team-badge team1-badge">
+                  <div class="team-icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                </div>
+                <div class="team-name-display">
+                  <div class="team-label-small">TEAM 1</div>
+                  <div id="team1-label" class="team-name">Player 1 & Player 2</div>
+                </div>
+              </div>
+              
+              <!-- Score Display -->
+              <div class="score-display">
+                <div class="score-value" id="team1-score-display">0</div>
+                <div class="score-label">GOALS</div>
+              </div>
+
+              <!-- Score Controls -->
+              <div class="score-controls">
+                <button class="score-btn-modern minus" id="team1-minus">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <div class="score-input-wrapper">
+                  <input type="number" id="team1-goals" value="0" min="0" readonly />
+                </div>
+                <button class="score-btn-modern plus" id="team1-plus">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- VS Divider -->
+            <div class="vs-divider">
+              <div class="vs-circle">
+                <div class="vs-text">VS</div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring delay-1"></div>
+                <div class="pulse-ring delay-2"></div>
+              </div>
+              <div class="divider-line"></div>
+            </div>
+
+            <!-- Team 2 Section -->
+            <div class="team-section team-right">
+              <div class="team-card">
+                <div class="team-badge team2-badge">
+                  <div class="team-icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                </div>
+                <div class="team-name-display">
+                  <div class="team-label-small">TEAM 2</div>
+                  <div id="team2-label" class="team-name">Player 3 & Player 4</div>
+                </div>
+              </div>
+              
+              <!-- Score Display -->
+              <div class="score-display">
+                <div class="score-value" id="team2-score-display">0</div>
+                <div class="score-label">GOALS</div>
+              </div>
+
+              <!-- Score Controls -->
+              <div class="score-controls">
+                <button class="score-btn-modern minus" id="team2-minus">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <div class="score-input-wrapper">
+                  <input type="number" id="team2-goals" value="0" min="0" readonly />
+                </div>
+                <button class="score-btn-modern plus" id="team2-plus">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="match-actions">
+            <button id="postpone-match-btn" class="btn-match btn-postpone-modern">
+              <i class="fas fa-clock"></i>
+              <span>Postpone Match</span>
+            </button>
+            <button id="submit-result-btn" class="btn-match btn-submit-modern">
+              <i class="fas fa-check-circle"></i>
+              <span>Submit Result</span>
+            </button>
+          </div>
+
+          <!-- Match Stats Footer -->
+          <div class="match-footer">
+            <div class="match-tip-modern">
+              <i class="fas fa-info-circle"></i>
+              <span>Use +/- buttons to adjust scores, then submit the result</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tiebreaker Screen -->
+      <div id="tiebreaker-screen" class="screen">
+        <div class="match-container tiebreaker-mode">
+          <!-- Header Section -->
+          <div class="match-header tiebreaker-header">
+            <div class="match-info">
+              <div class="tiebreaker-badge-large">
+                <i class="fas fa-bolt"></i>
+                <span>FINAL TIEBREAKER</span>
+                <i class="fas fa-bolt"></i>
+              </div>
+              <div class="tiebreaker-subtitle">Draws are not allowed - Winner takes all!</div>
+            </div>
+          </div>
+
+          <!-- Main Match Content -->
+          <div class="match-content">
+            <!-- Team 1 Section -->
+            <div class="team-section team-left">
+              <div class="team-card tiebreaker-card">
+                <div class="team-badge team1-badge tiebreaker-glow">
+                  <div class="team-icon">
+                    <i class="fas fa-trophy"></i>
+                  </div>
+                </div>
+                <div class="team-name-display">
+                  <div class="team-label-small">FINALIST 1</div>
+                  <div id="tie-team1-label" class="team-name">Team 1</div>
+                </div>
+              </div>
+              
+              <!-- Score Display -->
+              <div class="score-display tiebreaker-score">
+                <div class="score-value" id="tie-team1-score-display">0</div>
+                <div class="score-label">GOALS</div>
+              </div>
+
+              <!-- Score Controls -->
+              <div class="score-controls">
+                <button class="score-btn-modern minus" id="tie-team1-minus">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <div class="score-input-wrapper">
+                  <input type="number" id="tie-team1-goals" value="0" min="0" readonly />
+                </div>
+                <button class="score-btn-modern plus" id="tie-team1-plus">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- VS Divider -->
+            <div class="vs-divider tiebreaker-vs">
+              <div class="vs-circle tiebreaker-circle">
+                <div class="vs-text">VS</div>
+                <div class="pulse-ring tiebreaker-pulse"></div>
+                <div class="pulse-ring tiebreaker-pulse delay-1"></div>
+                <div class="pulse-ring tiebreaker-pulse delay-2"></div>
+              </div>
+              <div class="divider-line tiebreaker-line"></div>
+            </div>
+
+            <!-- Team 2 Section -->
+            <div class="team-section team-right">
+              <div class="team-card tiebreaker-card">
+                <div class="team-badge team2-badge tiebreaker-glow">
+                  <div class="team-icon">
+                    <i class="fas fa-trophy"></i>
+                  </div>
+                </div>
+                <div class="team-name-display">
+                  <div class="team-label-small">FINALIST 2</div>
+                  <div id="tie-team2-label" class="team-name">Team 2</div>
+                </div>
+              </div>
+              
+              <!-- Score Display -->
+              <div class="score-display tiebreaker-score">
+                <div class="score-value" id="tie-team2-score-display">0</div>
+                <div class="score-label">GOALS</div>
+              </div>
+
+              <!-- Score Controls -->
+              <div class="score-controls">
+                <button class="score-btn-modern minus" id="tie-team2-minus">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <div class="score-input-wrapper">
+                  <input type="number" id="tie-team2-goals" value="0" min="0" readonly />
+                </div>
+                <button class="score-btn-modern plus" id="tie-team2-plus">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <div class="match-actions">
+            <button id="declare-winner-btn" class="btn-match btn-declare-winner">
+              <i class="fas fa-crown"></i>
+              <span>Declare Winner</span>
+            </button>
+          </div>
+
+          <!-- Match Stats Footer -->
+          <div class="match-footer tiebreaker-footer">
+            <div class="match-tip-modern tiebreaker-tip">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>No draws allowed in the final match!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scores Dialog -->
+      <div id="scores-dialog" class="dialog">
+        <div class="dialog-content modern-dialog large-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-chart-bar"></i>
+              Current Standings
+            </h2>
+            <button class="close-dialog-btn" id="close-scores-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="dialog-body">
+            <div class="data-table">
+              <div class="table-header">
+                <div class="table-cell rank">Rank</div>
+                <div class="table-cell team">Team</div>
+                <div class="table-cell stat">Pts</div>
+                <div class="table-cell stat">GF</div>
+                <div class="table-cell stat">GA</div>
+                <div class="table-cell stat">GD</div>
+              </div>
+              <div id="scores-list" class="table-body">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Champions Dialog -->
+      <div id="champions-dialog" class="dialog">
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-crown"></i>
+              Championship Leaderboard
+            </h2>
+            <button class="close-dialog-btn" id="close-champions-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="dialog-body">
+            <div class="data-table">
+              <div class="table-header">
+                <div class="table-cell rank">Rank</div>
+                <div class="table-cell player">Player</div>
+                <div class="table-cell stat">Championships</div>
+                <div class="table-cell stat">Score</div>
+              </div>
+              <div id="champions-list" class="table-body">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Season History Dialog -->
+      <div id="seasons-dialog" class="dialog">
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-history"></i>
+              Season History
+            </h2>
+            <button class="close-dialog-btn" id="close-seasons-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="dialog-body">
+            <div class="section-block">
+              <label class="section-label">
+                <i class="fas fa-archive"></i>
+                Archived Seasons
+              </label>
+              <div class="custom-listbox">
+                <select id="seasons-listbox" size="10">
+                  <!-- Populated by JavaScript -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="view-season-btn" class="modern-btn primary-solid-btn">
+              <i class="fas fa-eye"></i>
+              <span>View Season</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Season View Dialog -->
+      <div id="season-view-dialog" class="dialog">
+        <div class="dialog-content modern-dialog">
+          <div class="dialog-header">
+            <h2 id="season-view-title">
+              <i class="fas fa-calendar-alt"></i>
+              Season Results
+            </h2>
+            <button class="close-dialog-btn" id="close-season-view-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="dialog-body">
+            <div class="data-table">
+              <div class="table-header">
+                <div class="table-cell rank">Rank</div>
+                <div class="table-cell player">Player</div>
+                <div class="table-cell stat">Championships</div>
+                <div class="table-cell stat">Score</div>
+              </div>
+              <div id="season-view-list" class="table-body">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Finish Season Dialog -->
       <div id="finish-season-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>Finish Season</h2>
-
-          <p>Are you sure you want to finish the current season?</p>
-          <p>This will archive the current players data and start a new season with reset scores and championships.</p>
-
-          <div class="entry-frame">
-            <label for="season-name">Season Name:</label>
-            <input type="text" id="season-name" placeholder="Enter season name" />
+        <div class="dialog-content modern-dialog small-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-flag-checkered"></i>
+              Finish Season
+            </h2>
+            <button class="close-dialog-btn" id="cancel-finish-season-btn">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
-          <div class="dialog-buttons">
-            <button id="cancel-finish-season-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="confirm-finish-season-btn" class="btn btn-finish">
-              <i class="fas fa-flag-checkered"></i> Finish Season
+          <div class="dialog-body">
+            <div class="warning-box">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>
+                <h4>Are you sure?</h4>
+                <p>This will archive the current season data and start fresh. Championships will be reset to zero.</p>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-tag"></i>
+                Season Name
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  id="season-name" 
+                  placeholder="e.g., Summer 2024"
+                  class="modern-input"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="confirm-finish-season-btn" class="modern-btn danger-solid-btn">
+              <i class="fas fa-check-circle"></i>
+              <span>Confirm & Finish</span>
             </button>
           </div>
         </div>
@@ -488,20 +818,43 @@
 
       <!-- Admin Login Dialog -->
       <div id="admin-login-dialog" class="dialog">
-        <div class="dialog-content">
-          <h2>Admin Login</h2>
-
-          <div class="entry-frame">
-            <label for="admin-password">Password:</label>
-            <input type="password" id="admin-password" placeholder="Enter admin password" />
+        <div class="dialog-content modern-dialog small-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-shield-alt"></i>
+              Admin Access
+            </h2>
+            <button class="close-dialog-btn" id="cancel-admin-login-btn">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
 
-          <div class="dialog-buttons">
-            <button id="cancel-admin-login-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="confirm-admin-login-btn" class="btn btn-start">
-              <i class="fas fa-sign-in-alt"></i> Login
+          <div class="dialog-body">
+            <div class="admin-lock-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">
+                <i class="fas fa-key"></i>
+                Enter Password
+              </label>
+              <div class="input-wrapper">
+                <input 
+                  type="password" 
+                  id="admin-password" 
+                  placeholder="••••••••"
+                  class="modern-input"
+                />
+                <i class="fas fa-shield-alt input-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="dialog-footer">
+            <button id="confirm-admin-login-btn" class="modern-btn primary-solid-btn full-width">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Login</span>
             </button>
           </div>
         </div>
@@ -509,26 +862,34 @@
 
       <!-- Admin Edit Dialog -->
       <div id="admin-edit-dialog" class="dialog">
-        <div class="dialog-content large">
-          <h2>Edit Player Data</h2>
+        <div class="dialog-content modern-dialog large-dialog">
+          <div class="dialog-header">
+            <h2>
+              <i class="fas fa-edit"></i>
+              Edit Player Data
+            </h2>
+            <button class="close-dialog-btn" id="cancel-admin-edit-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
 
-          <div class="admin-edit-table">
-            <div class="admin-header-row">
-              <div class="col-player">Player</div>
-              <div class="col-championships">Championships</div>
-              <div class="col-scores">Scores</div>
-            </div>
-            <div id="admin-edit-list" class="admin-edit-list">
-              <!-- Player edit rows will be populated by JavaScript -->
+          <div class="dialog-body">
+            <div class="data-table">
+              <div class="table-header">
+                <div class="table-cell player">Player</div>
+                <div class="table-cell stat editable">Championships</div>
+                <div class="table-cell stat editable">Score</div>
+              </div>
+              <div id="admin-edit-list" class="table-body editable">
+                <!-- Populated by JavaScript -->
+              </div>
             </div>
           </div>
 
-          <div class="dialog-buttons">
-            <button id="cancel-admin-edit-btn" class="btn btn-gray">
-              <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="save-admin-edit-btn" class="btn btn-start">
-              <i class="fas fa-save"></i> Save Changes
+          <div class="dialog-footer">
+            <button id="save-admin-edit-btn" class="modern-btn success-solid-btn large">
+              <i class="fas fa-save"></i>
+              <span>Save Changes</span>
             </button>
           </div>
         </div>
