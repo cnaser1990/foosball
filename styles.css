@@ -663,6 +663,13 @@ select option:checked {
     background: linear-gradient(135deg, #e04e6a, #f44336);
 }
 
+.back-to-menu {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
 .vs-frame {
     display: flex;
     align-items: center;

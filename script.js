@@ -149,6 +149,7 @@ class TournamentApp {
         document.getElementById('submit-result-btn').addEventListener('click', () => this.submitResult());
         document.getElementById('postpone-match-btn').addEventListener('click', () => this.postponeMatch());
         document.getElementById('view-scores-btn').addEventListener('click', () => this.showScores());
+        document.getElementById('back-to-menu-btn').addEventListener('click', () => this.showScreen('main-screen'));
 
         // Tiebreaker screen
         document.getElementById('tie-team1-plus').addEventListener('click', () => this.adjustScore('tie-team1-goals', 1));
