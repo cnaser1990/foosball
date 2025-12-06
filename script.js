@@ -477,8 +477,9 @@ class TournamentApp {
         const listbox = document.getElementById('available-players-listbox');
         const selected = Array.from(listbox.selectedOptions);
         
-        if (selected.length !== 2) {
-            alert('Select exactly 2 players for a team.');
+        // Changed: Accept 1 or 2 players for a team
+        if (selected.length === 0 || selected.length > 2) {
+            alert('Select 1 or 2 players for a team.');
             return;
         }
         
@@ -493,7 +494,9 @@ class TournamentApp {
         this.customTeams.push(team);
         this.refreshCustomTeamBuilder();
         
-        this.showNotification(`Team created: ${team.join(' & ')}`, 'success');
+        // Updated notification message
+        const teamLabel = team.length === 1 ? `Solo: ${team[0]}` : team.join(' & ');
+        this.showNotification(`Team created: ${teamLabel}`, 'success');
     }
 
     removeCustomTeam() {
@@ -519,11 +522,14 @@ class TournamentApp {
     }
 
     async finishCustomTeams() {
+        // Handle remaining players
         if (this.availablePlayers.length === 1) {
+            // Auto-add last remaining player as solo team
             this.customTeams.push([this.availablePlayers[0]]);
-            this.showNotification('Solo player added as team', 'info');
+            this.availablePlayers = [];
+            this.showNotification('Last player added as solo team', 'info');
         } else if (this.availablePlayers.length > 1) {
-            alert('All players must be assigned to a team (or one solo player remaining).');
+            alert('Please assign all remaining players to teams (select 1 or 2 players at a time).');
             return;
         }
         
@@ -612,28 +618,35 @@ class TournamentApp {
         await this.recordResult(t1, t2, g1, g2);
     }
 
-    async recordResult(t1, t2, g1, g2) {
-        // Update goals for and against
+        async recordResult(t1, t2, g1, g2) {
+        // Update goals for and against (Tournament Stats)
         this.teamStats[t1].gf += g1;
         this.teamStats[t1].ga += g2;
         this.teamStats[t2].gf += g2;
         this.teamStats[t2].ga += g1;
         
-        // Update points
+        // --- NEW LOGIC: Update Player Scores (Goals Scored - Goals Conceded) ---
+        // Calculate goal difference for Team 1 (e.g., 5 - 1 = 4)
+        const diff1 = g1 - g2;
+        // Calculate goal difference for Team 2 (e.g., 1 - 5 = -4)
+        const diff2 = g2 - g1;
+
+        // Apply to Team 1 players
+        this.teams[t1].forEach(player => {
+            this.data.scores[player] = (this.data.scores[player] || 0) + diff1;
+        });
+
+        // Apply to Team 2 players
+        this.teams[t2].forEach(player => {
+            this.data.scores[player] = (this.data.scores[player] || 0) + diff2;
+        });
+        // -----------------------------------------------------------------------
+
+        // Update Points for the Tournament Table (Win=3, Draw=1, Loss=0)
         if (g1 > g2) {
             this.teamStats[t1].points += 3;
-            // Add goal difference to winning team's players
-            const goalDiff = g1 - g2;
-            this.teams[t1].forEach(player => {
-                this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
-            });
         } else if (g2 > g1) {
             this.teamStats[t2].points += 3;
-            // Add goal difference to winning team's players
-            const goalDiff = g2 - g1;
-            this.teams[t2].forEach(player => {
-                this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
-            });
         } else {
             this.teamStats[t1].points += 1;
             this.teamStats[t2].points += 1;
@@ -762,13 +775,23 @@ class TournamentApp {
             return;
         }
         
-        const winner = g1 > g2 ? this.tiebreakerTeams[0] : this.tiebreakerTeams[1];
-        // Add goal difference to winning team's players
-        const goalDiff = Math.abs(g1 - g2);
-        this.teams[winner].forEach(player => {
-            this.data.scores[player] = (this.data.scores[player] || 0) + goalDiff;
+        // --- NEW LOGIC: Update Player Scores for Finals ---
+        const diff1 = g1 - g2;
+        const diff2 = g2 - g1;
+
+        // Apply to Team 1 players
+        this.teams[this.tiebreakerTeams[0]].forEach(player => {
+            this.data.scores[player] = (this.data.scores[player] || 0) + diff1;
         });
-        await this.declareChampion(winner);
+
+        // Apply to Team 2 players
+        this.teams[this.tiebreakerTeams[1]].forEach(player => {
+            this.data.scores[player] = (this.data.scores[player] || 0) + diff2;
+        });
+        // --------------------------------------------------
+
+        const winnerIndex = g1 > g2 ? this.tiebreakerTeams[0] : this.tiebreakerTeams[1];
+        await this.declareChampion(winnerIndex);
     }
 
     async declareChampion(winnerIndex) {
